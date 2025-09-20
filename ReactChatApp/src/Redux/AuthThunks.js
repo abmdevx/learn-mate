@@ -1,0 +1,66 @@
+// src/store/authThunks.js
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import authService from "../appwrite/auth"; 
+import { login, logout, finishLoading, setError } from "./AuthSlice";
+
+// ✅ Signup & auto-login
+export const signupUser = createAsyncThunk(
+  "auth/signupUser",
+  async (userData, { dispatch, rejectWithValue }) => {
+    try {
+      const user = await authService.createAccount(userData);
+      dispatch(login(user)); // update Redux
+      return user;
+    } catch (error) {
+      dispatch(setError(error.message)); // store error in Redux
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// ✅ Login
+export const loginUser = createAsyncThunk(
+  "auth/loginUser",
+  async ({ email, password }, { dispatch, rejectWithValue }) => {
+    try {
+      const user = await authService.login({ email, password });
+      dispatch(login(user));
+      return user;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// ✅ Check session (on app start)
+export const checkSession = createAsyncThunk(
+  "auth/checkSession",
+  async (_, { dispatch }) => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (user) {
+        dispatch(login(user));
+      } else {
+        dispatch(finishLoading()); // no session
+      }
+    } catch (error) {
+      dispatch(setError(error.message));
+      dispatch(finishLoading());
+    }
+  }
+);
+
+// ✅ Logout
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      await authService.logout();
+      dispatch(logout());
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    }
+  }
+);
