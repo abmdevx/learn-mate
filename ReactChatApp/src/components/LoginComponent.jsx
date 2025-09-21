@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { LogIn } from "lucide-react";
 import InputField from "./Shared/InputField";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const containerVariants = {
@@ -45,12 +46,12 @@ const Login = () => {
 
             {/* Forgot Password */}
             <div className="text-right">
-              <a
-                href="/forgot-password"
+              <Link
+                to={"/auth/forget-password"}
                 className="text-xs text-orange-400 hover:underline"
               >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
 
             {/* Submit Button */}
@@ -67,12 +68,12 @@ const Login = () => {
           {/* Bottom Link */}
           <div className="flex justify-center gap-1 mt-3 text-sm">
             <p className="text-white">Don't have an account?</p>
-            <a
-              href="/signup"
+            <Link
+              to={"/auth/signup"}
               className="text-orange-400 font-semibold hover:underline"
             >
               Sign Up
-            </a>
+            </Link>
           </div>
         </div>
       </motion.div>

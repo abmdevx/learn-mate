@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Features from "./pages/Features";
 import Copyright from "./pages/Copyright";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgetPassword";
 import "./index.css"; // your custom styles (optional)
 
 const router = createBrowserRouter([
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
           { index: true, element: <LoginPage /> },  // default for /auth
           { path: "login", element: <LoginPage /> },
           { path: "signup", element: <SignupWizard /> },
+          { path: "forget-password", element: <ForgotPassword /> }
         ],
       },
     ],

@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import InputField from "../Shared/InputField";
 import { useState } from "react";
 import Toast from "../Shared/Toast";
+import { Link } from "react-router-dom";
 
 const SignupStep1 = ({ nextStep }) => {
   const { register, trigger , formState: { errors } } = useFormContext();
@@ -104,12 +105,12 @@ const SignupStep1 = ({ nextStep }) => {
 
         <div className="flex justify-center gap-1 mt-3 text-sm">
           <p className="text-white">Already have an account?</p>
-          <a
-            href="/login"
+          <Link
+            to={"/auth/login"}
             className="text-orange-400 font-semibold hover:underline"
           >
             Login
-          </a>
+          </Link>
         </div>
       </motion.div>
 
