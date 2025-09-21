@@ -6,6 +6,10 @@ body {
   font-family: 'Fresca', sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 #global-loader {
   position: fixed;
   top: 0;

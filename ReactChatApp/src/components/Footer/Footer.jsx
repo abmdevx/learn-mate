@@ -1,4 +1,5 @@
 import { Github, Twitter, Linkedin, BookOpen } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -22,24 +23,24 @@ const Footer = () => {
           <h3 className="text-base font-semibold mb-2 text-orange-500">Quick Links</h3>
           <ul className="space-y-1 text-white">
             <li>
-              <a href="/" className="hover:text-orange-500 transition-colors">
+              <NavLink to={"/"} className="hover:text-orange-500 transition-colors">
                 Home
-              </a>
+              </NavLink>
             </li>
             <li>
-              <a href="/features" className="hover:text-orange-500 transition-colors">
+              <NavLink to={"/features"} className="hover:text-orange-500 transition-colors">
                 Features
-              </a>
+              </NavLink>
             </li>
             <li>
-              <a href="/about" className="hover:text-orange-500 transition-colors">
+              <NavLink to={"/about"} className="hover:text-orange-500 transition-colors">
                 About
-              </a>
+              </NavLink>
             </li>
             <li>
-              <a href="/copyright" className="hover:text-orange-500 transition-colors">
+              <NavLink to={"/copyright"} className="hover:text-orange-500 transition-colors">
                 Copyright
-              </a>
+              </NavLink>
             </li>
           </ul>
         </div>
