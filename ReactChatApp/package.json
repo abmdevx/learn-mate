@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@multiavatar/multiavatar": "^1.0.7",
     "@reduxjs/toolkit": "^2.9.0",
     "@tailwindcss/vite": "^4.1.13",
     "appwrite": "^20.0.0",
+    "avataaars2": "^1.1.1",
     "gsap": "^3.13.0",
     "lucide-react": "^0.544.0",
     "motion": "^12.23.12",
@@ -20,6 +22,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
+    "react-nice-avatar": "^1.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.1",
     "react-timezone-select": "^3.2.8",

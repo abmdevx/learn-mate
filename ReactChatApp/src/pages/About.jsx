@@ -1,11 +1,9 @@
 import { motion } from "framer-motion";
 import { BookOpen, Users, Target, Globe, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const About = () => {
-    const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-6 py-16 mt-6">
+    <div className="min-h-screen bg-gray-900 text-white px-6 py-16 mt-8">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,15 +84,6 @@ const About = () => {
             </div>
           </div>
         </div>
-
-        {/* Call to Action */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          className="bg-orange-500 text-gray-900 px-6 py-4 rounded-full shadow-lg inline-block cursor-pointer font-semibold"
-          onClick={() => navigate("/auth/signup")}
-        >
-          🚀 Start Your Learning Journey
-        </motion.button>
       </motion.div>
     </div>
   );

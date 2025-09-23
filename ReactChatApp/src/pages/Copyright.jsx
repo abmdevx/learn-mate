@@ -3,7 +3,7 @@ import { ShieldCheck, Lock, FileText } from "lucide-react";
 
 const Copyright = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-6 py-16 mt-3">
+    <div className="min-h-screen bg-gray-900 text-white px-6 py-16 mt-7">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}

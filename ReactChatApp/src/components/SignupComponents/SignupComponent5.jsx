@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useFormContext } from "react-hook-form";
 
-const SignupStep4 = ({ prevStep, handleSubmit }) => {
+const SignupStep5 = ({ prevStep, handleSubmit }) => {
   const { register, watch } = useFormContext();
   const Bio = watch("Bio");
 
@@ -46,4 +46,4 @@ const SignupStep4 = ({ prevStep, handleSubmit }) => {
   );
 };
 
-export default SignupStep4;
+export default SignupStep5;

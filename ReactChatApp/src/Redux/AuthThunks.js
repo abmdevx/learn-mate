@@ -2,13 +2,16 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../appwrite/auth"; 
 import { login, logout, finishLoading, setError } from "./AuthSlice";
+import { normalizeUserData } from "./Helper";
 
 // ✅ Signup & auto-login
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (userData, { dispatch, rejectWithValue }) => {
     try {
-      const user = await authService.createAccount(userData);
+      // console.log("userData in thunk:", userData);
+      const formattedData = normalizeUserData(userData);
+      const user = await authService.createAccount(formattedData);
       dispatch(login(user)); // update Redux
       return user;
     } catch (error) {

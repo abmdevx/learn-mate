@@ -1,5 +1,5 @@
 import conf from "../config/ConfigID";
-import { Client, Account, ID, Tables } from "appwrite";
+import { Client, Account, ID, TablesDB, Query } from "appwrite";
 
 export class AuthService {
   client = new Client();
@@ -12,7 +12,7 @@ export class AuthService {
       .setProject(conf.appwriteProjectId); // Project ID
 
     this.account = new Account(this.client);
-    this.tables = new Tables(this.client);
+    this.tables = new TablesDB(this.client);
   }
 
   resetClient() {
@@ -21,59 +21,70 @@ export class AuthService {
       .setProject(conf.appwriteProjectId);
 
     this.account = new Account(this.client);
-    this.tables = new Tables(this.client);
+    this.tables = new TablesDB(this.client);
 
     console.log("🔄 Appwrite client has been reset.");
   }
 
   // ✅ Create new user
-  async createAccount({ email, password, name, level, availability, timezone, topics, bio }) {
-    try {
-      const userId = ID.unique();
+  async createAccount({ email, password, name, level, availability, timezone, topics, bio, avatar }) {
+      try {
+        const userId = ID.unique();
 
-      // 1️⃣ Create user in Appwrite Auth
-      const userAccount = await this.account.create(userId, email, password, name);
+        // 1️⃣ Create user in Appwrite Auth
+        const userAccount = await this.account.create({ userId, email, password, name });
 
-      if (userAccount) {
+        if (!userAccount) return null;
+
         // 2️⃣ Create session immediately
-        await this.account.createEmailPasswordSession({email, password});
+        await this.account.createEmailPasswordSession({ email, password });
 
-        // 3️⃣ Insert row in Users table with same ID
-        await this.tables.createRow({
-          databaseId: conf.appwriteDatabaseId,
-          tableId: conf.appwriteUsersCollectionId, // now this is a TABLE, not legacy collection
-          rowId: userId, // use same ID as Auth user
-          data: {
-            Name: name,
-            Email: email,
-            Level: level || "Beginner",
-            Availability: availability || "Available",
-            Timezone: timezone || "UTC",
-            Topics: topics || [],
-            Bio: bio || "",
-            Status: "active",
-          },
-        });
+        // 3️⃣ Insert row in Users table with its own try-catch
+        try {
+          await this.tables.createRow({
+            databaseId: conf.appwriteDatabaseId,
+            tableId: conf.appwriteUsersCollectionId,
+            rowId: userId,
+            data: {
+              Name: name,
+              Email: email,
+              Level: level || "Beginner",
+              Availability: availability || "Available",
+              Timezone: timezone || "UTC",
+              Topics: Array.isArray(topics) ? topics : [],
+              Bio: bio || "",
+              Avatar: avatar ? JSON.stringify(avatar) : "",
+              Status: "offline",
+            },
+          });
+        } catch (tableError) {
+          console.error("❌ Failed to insert user row:", tableError);
+          // Optional: decide if you want to throw or continue
+          throw new Error("Failed to create user row in database");
+        }
 
         // 4️⃣ Fetch user details
         const currentUser = await this.account.get();
         return currentUser;
-      } else {
-        return null;
+
+      } catch (error) {
+        if (error.code === 409) {
+          throw new Error("Email already exists. Please log in.");
+        }
+
+        if (error.message.includes("Rate limit")) {
+          this.resetClient();
+        }
+
+        console.error("❌ Error creating account:", error);
+        throw error;
       }
-    } catch (error) {
-      if (error.message.includes("Rate limit")) {
-        this.resetClient();
-      }
-      console.error("❌ Error creating account:", error);
-      throw error;
     }
-  }
 
   // ✅ Login
   async login({ email, password }) {
     try {
-      await this.account.createEmailPasswordSession({email, password});
+      await this.account.createEmailPasswordSession({ email, password });
       return await this.account.get();
     } catch (error) {
       console.error("❌ Error logging in:", error);
@@ -88,6 +99,44 @@ export class AuthService {
     } catch (error) {
       console.error("❌ Error getting current user:", error);
       throw error;
+    }
+  }
+
+  async getProfile(userId) {
+    try {
+      return await this.tables.getRow({ databaseId: conf.appwriteDatabaseId, tableId: conf.appwriteUsersCollectionId, rowId: userId});
+    } catch (error) {
+      console.error("❌ Error getting profile:", error);
+      throw error;
+    }
+  }
+
+  async updateProfile(profileId, updates) {
+    try {
+      const response = await this.tables.updateRow(
+        { databaseId: conf.appwriteDatabaseId, tableId: conf.appwriteUsersCollectionId, rowId: profileId, data: updates}
+      );
+      return response;
+    } catch (error) {
+      console.error("Appwrite updateProfile error:", error);
+      throw error;
+    }
+  }
+
+  async checkEmailExists(email) {
+    try {
+      const response = await this.tables.listRows({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwriteUsersCollectionId,
+        queries: [
+          Query.equal("Email", email) // <-- wrap your query inside `queries` array
+        ],
+      });
+
+      return response.total > 0; // true if email exists
+    } catch (err) {
+      console.error("Email check error:", err);
+      throw new Error(err.message || "Failed to check email");
     }
   }
 

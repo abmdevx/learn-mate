@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import Store from "./Redux/Store";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import Home from "./components/Home";
@@ -10,6 +12,12 @@ import Features from "./pages/Features";
 import Copyright from "./pages/Copyright";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgetPassword";
+import PrivateRoute from "./routes/PrivateRoute";
+import PublicRoute from "./routes/PublicRoute";
+import Dashboard from "./components/Dashboard";
+import Profile from "./pages/Profile";
+import FindMatch from "./components/Matches/FindMatch";
+import Settings from "./pages/Settings";
 import "./index.css"; // your custom styles (optional)
 
 const router = createBrowserRouter([
@@ -17,19 +25,31 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { path: "/", element: <Home /> },
-      { path: "/features", element: <Features /> },
-      { path: "/about", element: <About /> },
-      { path: "/copyright", element: <Copyright /> },
+      // ----- Public -----
+
+      { index: true, element: <PublicRoute><Home /></PublicRoute> },
+      { path: "/features", element: <PublicRoute><Features /></PublicRoute> },
+      { path: "/about", element: <PublicRoute><About /></PublicRoute> },
+      { path: "/copyright", element: <PublicRoute><Copyright /></PublicRoute> },
 
       // ✅ Group auth-related routes
       {
         path: "/auth",
         children: [
-          { index: true, element: <LoginPage /> },  // default for /auth
-          { path: "login", element: <LoginPage /> },
-          { path: "signup", element: <SignupWizard /> },
-          { path: "forget-password", element: <ForgotPassword /> }
+          { index: true, element: <PublicRoute> <LoginPage /> </PublicRoute> },
+          { path: "login", element: <PublicRoute> <LoginPage /> </PublicRoute> },
+          { path: "signup", element: <PublicRoute> <SignupWizard /> </PublicRoute> },
+          { path: "forget-password", element: <PublicRoute> <ForgotPassword /> </PublicRoute> },
+        ],
+      },
+       // ----- Private -----
+      {
+        element: <PrivateRoute />, // wrapper for all private pages
+        children: [
+          { path: "/dashboard", element: <Dashboard /> },
+          { path: "/profile", element: <Profile /> },
+          { path: "/settings", element: <Settings /> },
+          { path: "/find-match", element: <FindMatch /> },
         ],
       },
     ],
@@ -39,7 +59,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <RouterProvider router={router} />
+  <Provider store={Store}>
+    <RouterProvider router={router} />
+  </Provider>
 );
 
 // Remove loader once React is ready

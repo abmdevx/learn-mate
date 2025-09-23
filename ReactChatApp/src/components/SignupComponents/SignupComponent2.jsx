@@ -1,12 +1,34 @@
-import InputField from "../Shared/InputField";
 import { motion } from "framer-motion";
 import { useFormContext, Controller } from "react-hook-form";
 import TagsInput from "../Shared/TagsInput";
+import Toast from "../Shared/Toast";
+import { useState } from "react";
 
 const SignupStep2 = ({ nextStep, prevStep }) => {
 
   const { register, watch, control } = useFormContext(); // ✅ get from RHF
-  console.log("Step2 values:", watch()); // 👈 Debug here
+  const [toast, setToast] = useState({ show: false, message: "", type: "error" });
+  const topics = watch("Topics");
+  const level = watch("Level");
+
+   const handleNext = () => {
+    if (!topics || topics.length < 3) {
+      setToast({
+        show: true,
+        message: "Please add at least 3 skills",
+        type: "error",
+      });      
+      return false; // prevent moving to next step
+    }
+
+    if (!level) {
+      setToast({ show: true, message: "Please select a level", type: "error" });
+      return false;
+    }
+    
+    nextStep(); // move to next step if validation passes
+    return true;
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
@@ -35,7 +57,7 @@ const SignupStep2 = ({ nextStep, prevStep }) => {
 
           <select
             name="Level"
-            {...register("Level", { required: true })}
+            {...control.register("Level")}
             className="px-3 py-2 rounded-lg bg-gray-900 text-white focus:outline-none text-sm"
           >
             <option value="">Select Level</option>
@@ -55,13 +77,19 @@ const SignupStep2 = ({ nextStep, prevStep }) => {
             type="button" 
             whileHover={{ scale: 1.05 }} 
             whileTap={{ scale: 0.97 }}
-            onClick={nextStep}
+            onClick={handleNext}
             className="py-2 px-4 bg-orange-500 text-gray-900 rounded-lg font-semibold shadow-md">
               Next →
             </motion.button>
           </div>
         </div>
       </motion.div>
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </div>
   );
 };

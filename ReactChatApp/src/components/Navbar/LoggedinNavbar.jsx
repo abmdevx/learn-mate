@@ -2,13 +2,28 @@ import { motion } from "framer-motion";
 import { Bell, LayoutDashboard, Layers, User, Settings, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { logoutUser } from "../../Redux/AuthThunks";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const UserNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }
 
   // Animation Variants
   const itemVariants = {
@@ -66,7 +81,7 @@ const UserNavbar = () => {
             ))}
 
             {/* Notifications */}
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               className="relative text-gray-300 hover:text-orange-500"
@@ -75,7 +90,7 @@ const UserNavbar = () => {
               <span className="absolute top-0 right-0 bg-orange-500 text-xs text-white rounded-full px-1">
                 3
               </span>
-            </motion.button>
+            </motion.button> */}
 
             {/* Profile Dropdown */}
             <div className="relative">
@@ -100,7 +115,9 @@ const UserNavbar = () => {
                   <Link to="/settings" className="px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
                     <Settings className="h-4 w-4 mr-2" /> Settings
                   </Link>
-                  <button className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
+                  <button 
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
                     <LogOut className="h-4 w-4 mr-2" /> Logout
                   </button>
                 </motion.div>
@@ -171,7 +188,9 @@ const UserNavbar = () => {
               <Link to="/settings" className="block px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-orange-500">
                 Settings
               </Link>
-              <button className="w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-orange-500">
+              <button
+              onClick={handleLogout} 
+              className="w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-orange-500">
                 Logout
               </button>
             </div>

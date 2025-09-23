@@ -3,11 +3,26 @@ import HomeNavbar from "./components/Navbar/HomeNavbar";
 import LoggedInNavbar from "./components/Navbar/LoggedinNavbar";
 import Footer from "./components/Footer/Footer";
 import ScrollToTop from "./components/ScrollTop";
-
-// Temporary: mock login state (later you’ll replace with real auth context)
-const isLoggedIn = false; // change to false to test guest view
+import { useSelector } from "react-redux";
+import { checkSession } from "./Redux/AuthThunks";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import Loader from "./Loader";
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkSession());
+  }, [dispatch]);
+
+  const { userData, loading } = useSelector((state) => state.auth);
+  console.log("Current user in App.jsx:", userData);
+  
+  const isLoggedIn = !!userData;
+
+  if (loading) return <Loader />;
+
   return (
     <div className="min-h-screen flex flex-col">
       <ScrollToTop /> 
@@ -20,7 +35,8 @@ function App() {
         <Outlet />
       </main>
 
-      <Footer />
+      {/* Footer only for guests */}
+      {!isLoggedIn && <Footer />}
     </div>
   );
 }

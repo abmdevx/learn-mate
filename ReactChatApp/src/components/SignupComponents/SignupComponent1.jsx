@@ -5,28 +5,43 @@ import InputField from "../Shared/InputField";
 import { useState } from "react";
 import Toast from "../Shared/Toast";
 import { Link } from "react-router-dom";
+import authService from "../../appwrite/auth";
 
 const SignupStep1 = ({ nextStep }) => {
-  const { register, trigger , formState: { errors } } = useFormContext();
+  const { register, trigger , formState: { errors } , getValues } = useFormContext();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState(""); // <-- add this
 
-  const handleNext = async () => {
-    const isValid = await trigger(["Name", "Email", "Password"]); // validate only these fields
-    if (isValid) {
-      nextStep();
-    }
-    else {
-      // get the first validation error
+   const handleNext = async () => {
+    const isValid = await trigger(["Name", "Email", "Password"]);
+    if (!isValid) {
       const firstError =
-      errors.Name?.message ||
-      errors.Email?.message ||
-      errors.Password?.message ||
-      "Please fill all required fields correctly.";
+        errors.Name?.message ||
+        errors.Email?.message ||
+        errors.Password?.message ||
+        "Please fill all required fields correctly.";
 
-      setToastMessage(firstError);  // store dynamic message here
+      setToastMessage(firstError);
       setShowToast(true);
+      return;
     }
+
+  try {
+      const email = getValues("Email");
+      const exists = await authService.checkEmailExists(email);
+      if (exists) {
+        setToastMessage("Email already exists. Please use another email.");
+        setShowToast(true);
+        return;
+      }
+    } catch (err) {
+        setToastMessage(err.message || "Error checking email");
+        setShowToast(true);
+      return;
+    }
+
+    nextStep();
+
   };
 
   return (
