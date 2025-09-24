@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Bell, LayoutDashboard, Layers, User, Settings, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { logoutUser } from "../../Redux/AuthThunks";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,18 @@ import { useNavigate } from "react-router-dom";
 const UserNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null); // ✅ ref for dropdown
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -93,7 +105,7 @@ const UserNavbar = () => {
             </motion.button> */}
 
             {/* Profile Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
@@ -109,14 +121,21 @@ const UserNavbar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2"
                 >
-                  <Link to="/profile" className="px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
+                  <Link to="/profile"
+                  onClick={() => setDropdownOpen(false)} // ✅ close on click
+                  className="px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
                     <User className="h-4 w-4 mr-2" /> Profile
                   </Link>
-                  <Link to="/settings" className="px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
+                  <Link to="/settings" 
+                  onClick={() => setDropdownOpen(false)} // ✅ close on click
+                  className="px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
                     <Settings className="h-4 w-4 mr-2" /> Settings
                   </Link>
                   <button 
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    setDropdownOpen(false); // ✅ close on logout
+                  }}
                   className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-orange-500 flex items-center">
                     <LogOut className="h-4 w-4 mr-2" /> Logout
                   </button>

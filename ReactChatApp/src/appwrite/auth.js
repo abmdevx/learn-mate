@@ -123,20 +123,30 @@ export class AuthService {
     }
   }
 
-  async checkEmailExists(email) {
+  async checkEmailOrUsernameExists(email, username) {
     try {
       const response = await this.tables.listRows({
         databaseId: conf.appwriteDatabaseId,
         tableId: conf.appwriteUsersCollectionId,
         queries: [
-          Query.equal("Email", email) // <-- wrap your query inside `queries` array
+          Query.or([
+            Query.equal("Email", email),
+            Query.equal("Name", username)
+          ])
         ],
       });
 
-      return response.total > 0; // true if email exists
+      const exists = { email: false, username: false };
+
+      response.rows.forEach(row => {
+        if (row.Email === email) exists.email = true;
+        if (row.Name === username) exists.username = true;
+      });
+
+      return exists;
     } catch (err) {
-      console.error("Email check error:", err);
-      throw new Error(err.message || "Failed to check email");
+      console.error("Check error:", err);
+      throw new Error(err.message || "Failed to check email or username");
     }
   }
 

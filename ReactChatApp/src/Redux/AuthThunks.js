@@ -30,8 +30,9 @@ export const loginUser = createAsyncThunk(
       dispatch(login(user));
       return user;
     } catch (error) {
-      dispatch(setError(error.message));
-      return rejectWithValue(error.message);
+      const message = error.message || "Invalid email or password";
+      dispatch(setError(message));
+      return rejectWithValue(message);
     }
   }
 );

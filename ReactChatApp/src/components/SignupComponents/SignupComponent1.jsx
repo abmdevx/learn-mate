@@ -12,7 +12,7 @@ const SignupStep1 = ({ nextStep }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState(""); // <-- add this
 
-   const handleNext = async () => {
+  const handleNext = async () => {
     const isValid = await trigger(["Name", "Email", "Password"]);
     if (!isValid) {
       const firstError =
@@ -28,12 +28,20 @@ const SignupStep1 = ({ nextStep }) => {
 
   try {
       const email = getValues("Email");
-      const exists = await authService.checkEmailExists(email);
-      if (exists) {
+      const username = getValues("Name");
+
+      const exists = await authService.checkEmailOrUsernameExists(email , username);
+      if (exists.email) {
         setToastMessage("Email already exists. Please use another email.");
         setShowToast(true);
         return;
       }
+
+      if (exists.username) {
+      setToastMessage("Username already exists. Please choose another username.");
+      setShowToast(true);
+      return;
+    }
     } catch (err) {
         setToastMessage(err.message || "Error checking email");
         setShowToast(true);
