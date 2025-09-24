@@ -104,7 +104,7 @@ export default function Dashboard({ user }) {
           <p className="text-gray-400">Find learning partners tailored to your topics and level.</p>
         </div>
         <button 
-        onClick={() => navigate("/find-match")}
+        onClick={() => navigate("/match")}
         className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-lg font-medium shadow-lg transition">
           Find Your Match 🚀
         </button>

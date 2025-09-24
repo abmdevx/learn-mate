@@ -16,7 +16,8 @@ import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 import Dashboard from "./components/Dashboard";
 import Profile from "./pages/Profile";
-import FindMatch from "./components/Matches/FindMatch";
+import Match from "./components/Matches/Match";
+import FindMatchPage from "./components/Matches/FindMatches";
 import Settings from "./pages/Settings";
 import "./index.css"; // your custom styles (optional)
 
@@ -49,7 +50,8 @@ const router = createBrowserRouter([
           { path: "/dashboard", element: <Dashboard /> },
           { path: "/profile", element: <Profile /> },
           { path: "/settings", element: <Settings /> },
-          { path: "/find-match", element: <FindMatch /> },
+          { path: "/match", element: <Match /> },
+          { path: "/find-match", element: <FindMatchPage /> },
         ],
       },
     ],
