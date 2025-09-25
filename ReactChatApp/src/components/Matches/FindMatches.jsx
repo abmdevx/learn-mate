@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import matchService from "../../appwrite/matches";
 import { useSelector } from "react-redux";
 import ReactNiceAvatar from "react-nice-avatar";
+import authService from "../../appwrite/auth";
 
 export default function FindMatchPage() {
   const [loading, setLoading] = useState(false);
   const [matches, setMatches] = useState([]);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [profile, setProfile] = useState(null);
 
   const { userData } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!userData?.$id) return;
+      const res = await authService.getProfile(userData.$id);
+      setProfile(res);
+    };
+
+    fetchProfile();
+  }, [userData]);
 
   const handleFindMatch = async () => {
     setHasSearched(true);
@@ -39,11 +51,13 @@ export default function FindMatchPage() {
   const handleLike = async (matchId) => {
     try {
       const currentUserId = userData.$id;
+      console.log("Saving match:", currentUserId, matchId);
       await matchService.saveLikedMatch(currentUserId, matchId);
       alert("✅ Match saved!");
-    } catch (err) {
-      console.error("Error saving match:", err);
-      alert("❌ Could not save match.");
+    } catch (error) {
+      alert("❌ Failed to save match.");
+      console.error("❌ Error saving match:", error.message || error);
+      throw error;
     }
   };
 
@@ -59,7 +73,7 @@ export default function FindMatchPage() {
         transition={{ duration: 0.6 }}
         className="flex flex-col items-center justify-center"
       >
-        <h1 className="text-2xl font-bold text-orange-5002">
+        <h1 className="text-2xl font-bold text-white mb-6">
           🔎 Finding Your Matches
         </h1>
 
@@ -115,9 +129,23 @@ export default function FindMatchPage() {
               <p className="text-orange-500 font-bold">
                 Level: <span className="text-white">{m.Level}</span>
               </p>
-              <p className="text-orange-500 font-bold">
-                Topics: <span className="text-white">{m.Topics?.join(", ")}</span>
-              </p>
+              <div className="flex flex-wrap gap-2 mt-2 text-orange-600 font-bold">
+                Matched Topics: {""}
+                {m.Topics
+                  ?.filter((topic) =>
+                    profile.Topics?.some(
+                      (userTopic) => userTopic.toLowerCase() === topic.toLowerCase()
+                    )
+                  )
+                  .map((matchedTopic, index) => (
+                    <span
+                      key={index}
+                      className="bg-purple-600 px-3 py-1 rounded-full text-sm text-white"
+                    >
+                      {matchedTopic}
+                    </span>
+                  )) || <p className="text-gray-400">No matched topics</p>}
+              </div>
 
               <div className="flex gap-4 mt-4">
                 <button

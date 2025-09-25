@@ -4,10 +4,24 @@ import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import { useState , useEffect } from "react";
 import authService from "../appwrite/auth";
+import matchService from "../appwrite/matches";
+import ReactNiceAvatar from "react-nice-avatar";
 
-export default function Dashboard({ user }) {
+export default function Dashboard() {
   const { userData } = useSelector((state) => state.auth);
   const [profile, setProfile] = useState(null);
+  const [MatchedProfiles, setMatchedProfiles] = useState([]);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (!userData?.$id) return;
+      const profiles = await matchService.getMatchedProfiles(userData.$id, authService);
+      console.log("Fetched matched profiles:", profiles);
+      setMatchedProfiles(profiles);
+    };
+
+    fetchMatches();
+  }, [userData]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -87,15 +101,42 @@ export default function Dashboard({ user }) {
       </div>
 
       {/* Matches Section */}
-      <div className="bg-gray-800 p-6 rounded-2xl shadow mb-8">
+    <div className="bg-gray-800 p-6 rounded-2xl shadow mb-8">
         <div className="flex items-center gap-3 mb-4">
           <Users className="text-green-400 h-6 w-6" />
           <h3 className="text-lg font-semibold">Your Matches</h3>
         </div>
+
+      {MatchedProfiles.length === 0 ? (
         <p className="text-gray-400">
-          You don’t have any matches yet. Click <span className="text-blue-400">Find Your Match</span> to start.
+          You don’t have any matches yet. Click{" "}
+          <span className="text-blue-400">Find Your Match</span> to start.
         </p>
-      </div>
+      ) : (
+        <div className="flex flex-wrap gap-6">
+          {MatchedProfiles.map((match) => (
+            <div
+              key={match.$id}
+              className="flex flex-col items-center w-20"
+            >
+              {match.Avatar ? (
+                <ReactNiceAvatar
+                  style={{ width: "64px", height: "64px" }}
+                  {...JSON.parse(match.Avatar)}
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center text-xl font-bold">
+                  {match.Name?.[0]}
+                </div>
+              )}
+              <p className="mt-2 text-sm font-medium text-center truncate">
+                {match.Name}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
 
       {/* CTA Section */}
       <div className="bg-gray-800 p-6 rounded-2xl shadow flex flex-col md:flex-row items-center justify-between gap-4">

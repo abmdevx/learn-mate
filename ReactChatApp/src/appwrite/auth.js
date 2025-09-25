@@ -111,6 +111,11 @@ export class AuthService {
     }
   }
 
+  async getUsersByIds(userIds = []) {
+    const profiles = await Promise.all(userIds.map((id) => this.getProfile(id)));
+    return profiles.filter(Boolean); // remove null if any user not found
+  }
+
   async updateProfile(profileId, updates) {
     try {
       const response = await this.tables.updateRow(

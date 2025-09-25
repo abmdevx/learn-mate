@@ -1,5 +1,5 @@
 import conf from "../config/ConfigID";
-import { Client, TablesDB, Query } from "appwrite";
+import { Client, TablesDB, Query, ID } from "appwrite";
 
 export class MatchService {
   client = new Client();
@@ -70,51 +70,118 @@ export class MatchService {
     }
   }
 
-  // 💾 2) Save liked match (updates both users' MatchedUsers lists)
-  async saveLikedMatch(currentUserId, matchedUserId) {
+  // Get user by ID
+async getUserById(userId) {
+  return await this.tables.getRow({
+    databaseId: conf.appwriteDatabaseId,
+    tableId: conf.appwriteUsersCollectionId,
+    rowId: userId,
+  });
+}
+
+async getMatchDocByUserId(userId) {
     try {
-      // Get both users
-      const currentUser = await this.tables.getRow({
+      const res = await this.tables.listRows({
         databaseId: conf.appwriteDatabaseId,
-        tableId: conf.appwriteUsersCollectionId,
-        rowId: currentUserId,
-      });
-      const matchedUser = await this.tables.getRow({
-        databaseId: conf.appwriteDatabaseId,
-        tableId: conf.appwriteUsersCollectionId,
-        rowId: matchedUserId,
+        tableId: conf.appwritematchesCollectionId,
+        queries: [Query.equal("UserId", userId)],
       });
 
-      if (!currentUser || !matchedUser) {
-        throw new Error("One of the users not found");
-      }
-
-      // Update current user row
-      await this.tables.updateRow({
-        databaseId: conf.appwriteDatabaseId,
-        tableId: conf.appwriteUsersCollectionId,
-        rowId: currentUserId,
-        data: {
-          MatchedUsers: [...(currentUser.MatchedUsers || []), matchedUserId],
-        },
-      });
-
-      // Update matched user row
-      await this.tables.updateRow({
-        databaseId: conf.appwriteDatabaseId,
-        tableId: conf.appwriteUsersCollectionId,
-        rowId: matchedUserId,
-        data: {
-          MatchedUsers: [...(matchedUser.MatchedUsers || []), currentUserId],
-        },
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error("❌ Error saving match:", error);
-      throw error;
+      return res.rows[0] || null;
+    } catch (err) {
+      console.error("❌ Error fetching matchDoc:", err);
+      return null;
     }
   }
+
+  // Get matched user profiles directly
+  async getMatchedProfiles(userId, authService) {
+    try {
+      const matchDoc = await this.getMatchDocByUserId(userId);
+      if (!matchDoc) return [];
+
+      const matchedIds = matchDoc.MatchedUsers || [];
+      if (!matchedIds.length) return [];
+
+      const profiles = await authService.getUsersByIds(matchedIds);
+      return profiles;
+    } catch (err) {
+      console.error("❌ Error fetching matched profiles:", err);
+      return [];
+    }
+  }
+
+
+// Find common topics (case-insensitive)
+getCommonTopics(userTopics = [], matchedTopics = []) {
+  const userNormalized = userTopics.map((t) => t.toLowerCase());
+  const matchedNormalized = matchedTopics.map((t) => t.toLowerCase());
+  return userNormalized.filter((topic) => matchedNormalized.includes(topic));
+}
+
+// Create or update match doc for a user
+async upsertMatchDoc(userId, level, matchedUserId, commonTopics) {
+  let userDoc = await this.tables.listRows({
+    databaseId: conf.appwriteDatabaseId,
+    tableId: conf.appwritematchesCollectionId,
+    queries: [Query.equal("UserId", userId)],
+  });
+
+  if (userDoc.total === 0) {
+    // Create new match doc
+    await this.tables.createRow({
+      databaseId: conf.appwriteDatabaseId,
+      tableId: conf.appwritematchesCollectionId,
+      rowId: ID.unique(),
+      data: {
+        UserId: userId,
+        Level: level,
+        MatchedUsers: [matchedUserId],
+        MatchedTopics: commonTopics,
+      },
+    });
+  } else {
+    // Update existing
+    const doc = userDoc.documents[0];
+    await this.tables.updateRow({
+      databaseId: conf.appwriteDatabaseId,
+      tableId: conf.appwritematchesCollectionId,
+      rowId: doc.$id,
+      data: {
+        MatchedUsers: [...new Set([...(doc.MatchedUsers || []), matchedUserId])],
+        MatchedTopics: [...new Set([...(doc.MatchedTopics || []), ...commonTopics])],
+      },
+    });
+  }
+}
+
+  // 💾 2) Save liked match (updates both users' MatchedUsers lists)
+async saveLikedMatch(currentUserId, matchedUserId) {
+  try {
+    // 1. Get both users
+    const currentUser = await this.getUserById(currentUserId);
+    const matchedUser = await this.getUserById(matchedUserId);
+
+    if (!currentUser || !matchedUser) {
+      throw new Error("One of the users not found");
+    }
+
+    // 2. Find common topics
+    const commonTopics = this.getCommonTopics(currentUser.Topics, matchedUser.Topics);
+
+    // 3. Update current user's match record
+    await this.upsertMatchDoc(currentUserId, currentUser.Level, matchedUserId, commonTopics);
+    
+    // 4. Update matched user's match record
+    await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Error saving match:", error);
+    throw error;
+  }
+}
+
 }
 
 const matchService = new MatchService();
