@@ -1,4 +1,4 @@
-import { Github, Twitter, Linkedin, BookOpen } from "lucide-react";
+import { Github, Linkedin, BookOpen, MessageCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const Footer = () => {
@@ -50,22 +50,20 @@ const Footer = () => {
           <h3 className="text-base font-semibold mb-2 text-orange-400">Follow Us</h3>
           <div className="flex space-x-3 text-white">
             <a
-              href="#"
+              href="https://github.com/abdullahbutt09"
               className="w-8 h-8 flex items-center justify-center bg-gray-800 rounded-full hover:bg-orange-500 hover:text-gray-900 transition"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Github className="h-4 w-4" />
             </a>
             <a
-              href="#"
+              href="https://api.whatsapp.com/message/XQK4QBYGVOVQL1"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-8 h-8 flex items-center justify-center bg-gray-800 rounded-full hover:bg-orange-500 hover:text-gray-900 transition"
             >
-              <Twitter className="h-4 w-4" />
-            </a>
-            <a
-              href="#"
-              className="w-8 h-8 flex items-center justify-center bg-gray-800 rounded-full hover:bg-orange-500 hover:text-gray-900 transition"
-            >
-              <Linkedin className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4" />
             </a>
           </div>
         </div>
