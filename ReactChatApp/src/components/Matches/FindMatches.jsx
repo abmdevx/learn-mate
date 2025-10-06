@@ -5,6 +5,8 @@ import matchService from "../../appwrite/matches";
 import { useSelector } from "react-redux";
 import ReactNiceAvatar from "react-nice-avatar";
 import authService from "../../appwrite/auth";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // ✅ Add this import
 
 export default function FindMatchPage() {
   const [loading, setLoading] = useState(false);
@@ -13,6 +15,7 @@ export default function FindMatchPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [profile, setProfile] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const navigate = useNavigate();
 
   const { userData } = useSelector((state) => state.auth);
 
@@ -67,7 +70,23 @@ export default function FindMatchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center px-6 text-white">
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white p-4">
+      {/* --- Top Left Go Back Button --- */}
+        <motion.button
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate("/match")}
+          className="absolute top-6 left-6 flex items-center gap-2 
+                    bg-gray-800/60 border border-gray-700/40 
+                    hover:bg-gray-700/60 text-gray-300 
+                    px-4 py-2 rounded-xl shadow-md 
+                    transition-all duration-200 mt-13"
+        >
+          <ArrowLeft size={18} />
+          Back
+        </motion.button>
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -103,7 +122,7 @@ export default function FindMatchPage() {
         )}
 
         {/* --- Display all matches --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 mt-20 md:mt-0 grid-cols-1">
           {matches.map((m) => (
             <motion.div
               key={m.$id}
@@ -124,7 +143,7 @@ export default function FindMatchPage() {
             </motion.div>
           ))}
         </div>
-
+        {/* --- Selected Match Modal --- */}
         {selectedMatch && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -216,6 +235,24 @@ export default function FindMatchPage() {
           <p className="text-gray-400 mt-4">No matches found. 🔄 Try again.</p>
         )}
       </motion.div>
+      {/* --- Try Again Button --- */}
+      {hasSearched && !loading && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleFindMatch}
+          className="mt-8 flex items-center gap-2 bg-gradient-to-r 
+                    from-orange-600 to-orange-500 hover:from-orange-500 
+                    hover:to-orange-400 px-6 py-3 rounded-xl 
+                    font-semibold text-white shadow-lg shadow-orange-600/30 
+                    transition"
+        >
+          <RefreshCw size={18} />
+          Not satisfied? Try Again
+        </motion.button>
+      )}
     </div>
   );
 }
