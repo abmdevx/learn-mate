@@ -1,4 +1,4 @@
-# 📚 LearnHub
+# 📚 LearnMate
 
 A modern platform that makes learning **personalized, collaborative, and flexible**.  
 Connect with learners worldwide, set your own schedule, and grow together.
