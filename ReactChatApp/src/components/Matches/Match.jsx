@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Edit3 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import authService from "../../appwrite/auth";
 
 export default function Match() {
@@ -30,64 +31,111 @@ export default function Match() {
     fetchProfile();
   }, [userData]);
 
-  // --- Loader skeleton ---
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-900 text-white px-6">
-        <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md text-center border border-gray-800 animate-pulse">
-          <div className="h-6 bg-gray-700 rounded w-1/2 mx-auto mb-6"></div>
-          <div className="mb-6 bg-gray-700/60 p-5 rounded-xl">
-            <div className="h-4 bg-gray-700 rounded w-1/3 mb-3"></div>
-            <div className="h-3 bg-gray-700 rounded w-2/3 mx-auto mb-2"></div>
-            <div className="h-3 bg-gray-700 rounded w-1/2 mx-auto"></div>
-            <div className="h-8 bg-gray-700 rounded w-32 mx-auto mt-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-gray-800/40 backdrop-blur-sm p-8 rounded-3xl w-full max-w-md border border-gray-700/40 shadow-lg shadow-orange-600/10"
+        >
+          <div className="space-y-6 animate-pulse">
+            <div className="h-8 bg-gray-700/50 rounded-xl w-2/3 mx-auto"></div>
+            <div className="bg-gray-700/30 p-6 rounded-2xl space-y-3">
+              <div className="h-4 bg-gray-700/50 rounded w-1/3"></div>
+              <div className="h-3 bg-gray-700/50 rounded w-2/3"></div>
+              <div className="h-3 bg-gray-700/50 rounded w-1/2"></div>
+            </div>
+            <div className="h-12 bg-gradient-to-r from-orange-600/30 to-orange-500/30 rounded-xl"></div>
           </div>
-          <div className="h-10 bg-gray-700 rounded w-3/4 mx-auto"></div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-900 text-white px-6">
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md text-center border border-gray-800">
-        <h1 className="text-2xl font-bold text-orange-600 mb-6">
-          🔎 Find Your Match
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-center mb-8 mt-10"
+        >
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            className="inline-block text-5xl mb-3"
+          >
+            🔎
+          </motion.div>
+          <h1 className="text-3xl font-bold text-white">Find Your Match</h1>
+        </motion.div>
 
-        {/* --- Show user info first --- */}
         {profile && (
-          <div className="mb-6 bg-gray-700 p-5 rounded-xl shadow-inner">
-            <h2 className="text-lg font-semibold text-orange-600 mb-2">
-              Your Profile
-            </h2>
-            <p className="text-white">
-              <span className="font-bold text-orange-600 mr-1">Level:</span>{" "}
-              {profile.Level || "Not set"}
-            </p>
-            <p className="text-white text-sm mt-2">
-              <span className="font-bold text-orange-600 mr-1">Skills:</span>{" "}
-              {profile.Topics?.join(", ") || "No skills added"}
-            </p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-6 mb-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-orange-500">Your Profile</h2>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/profile")}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700/50 hover:bg-gray-700 rounded-xl text-sm text-gray-300 transition"
+              >
+                <Edit3 size={14} />
+                Edit
+              </motion.button>
+            </div>
 
-            {/* Edit button */}
-            <button
-              onClick={() => navigate("/profile")}
-              className="mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-sm font-medium transition mx-auto"
-            >
-              <Edit3 size={16} /> Edit Profile
-            </button>
-          </div>
+            <div className="space-y-3">
+              <div>
+                <span className="text-gray-400 text-sm">Level</span>
+                <p className="text-white font-medium">{profile.Level || "Not set"}</p>
+              </div>
+              
+              <div>
+                <span className="text-gray-400 text-sm">Skills</span>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {profile.Topics && profile.Topics.length > 0 ? (
+                    profile.Topics.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="bg-indigo-600/80 text-white text-sm px-3 py-1 rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-white font-medium">No skills added</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
-        {/* --- Start button --- */}
-        <button
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => navigate("/find-match")}
-          className="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded-xl text-lg font-medium shadow-lg transition w-full"
+          className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-orange-600/20 transition flex items-center justify-center gap-2 cursor-pointer"
         >
           Start Finding Your Match 🚀
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </div>
   );
 }

@@ -12,6 +12,7 @@ export default function FindMatchPage() {
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [selectedMatch, setSelectedMatch] = useState(null);
 
   const { userData } = useSelector((state) => state.auth);
 
@@ -73,10 +74,6 @@ export default function FindMatchPage() {
         transition={{ duration: 0.6 }}
         className="flex flex-col items-center justify-center"
       >
-        <h1 className="text-2xl font-bold text-white mb-6">
-          🔎 Finding Your Matches
-        </h1>
-
         {!loading && matches.length === 0 && !error && (
           <button
             onClick={handleFindMatch}
@@ -106,13 +103,14 @@ export default function FindMatchPage() {
         )}
 
         {/* --- Display all matches --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           {matches.map((m) => (
             <motion.div
               key={m.$id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-gray-900 p-8 rounded-xl flex flex-col items-center border-4 border-orange-500"
+              className="bg-gray-800 p-6 rounded-xl flex flex-col items-center cursor-pointer hover:border-orange-400 border-2 border-transparent transition"
+              onClick={() => setSelectedMatch(m)}
             >
               {m?.Avatar ? (
                 <ReactNiceAvatar
@@ -122,48 +120,97 @@ export default function FindMatchPage() {
               ) : (
                 <div className="h-10 w-10 bg-green-400 rounded-full mb-2" />
               )}
-              <h2 className="text-xl font-semibold mt-2 text-white">{m.Name}</h2>
-              <p className="text-orange-500 font-bold">
-                Email: <span className="text-white">{m.Email}</span>
-              </p>
-              <p className="text-orange-500 font-bold">
-                Level: <span className="text-white">{m.Level}</span>
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2 text-orange-600 font-bold">
-                Matched Topics: {""}
-                {m.Topics
-                  ?.filter((topic) =>
-                    profile.Topics?.some(
-                      (userTopic) => userTopic.toLowerCase() === topic.toLowerCase()
-                    )
-                  )
-                  .map((matchedTopic, index) => (
-                    <span
-                      key={index}
-                      className="bg-purple-600 px-3 py-1 rounded-full text-sm text-white"
-                    >
-                      {matchedTopic}
-                    </span>
-                  )) || <p className="text-gray-400">No matched topics</p>}
-              </div>
-
-              <div className="flex gap-4 mt-4">
-                <button
-                  onClick={() => handleLike(m.$id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
-                >
-                  <ThumbsUp size={18} /> Like
-                </button>
-                <button
-                  onClick={() => handleDislike(m.$id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition"
-                >
-                  <ThumbsDown size={18} /> Skip
-                </button>
-              </div>
+              <h2 className="text-lg font-semibold mt-2 text-white">{m.Name}</h2>
             </motion.div>
           ))}
         </div>
+
+        {selectedMatch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-gray-900 p-8 rounded-xl w-96 relative flex flex-col items-center justify-center gap-2"
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedMatch(null)}
+                className="absolute top-3 right-3 text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+
+              {/* Avatar */}
+              {selectedMatch?.Avatar && (
+                <ReactNiceAvatar
+                  style={{ width: "100px", height: "100px" }}
+                  {...JSON.parse(selectedMatch.Avatar)}
+                />
+              )}
+
+              {/* Name + details */}
+              <h2 className="text-xl font-semibold mt-2 text-white">{selectedMatch.Name}</h2>
+              <p className="text-orange-500 font-bold">
+                Email: <span className="text-white">{selectedMatch.Email}</span>
+              </p>
+              <p className="text-orange-500 font-bold">
+                Level: <span className="text-white">{selectedMatch.Level}</span>
+              </p>
+
+              {/* Matched Topics */}
+              <div className="flex flex-wrap gap-2 text-orange-600 font-bold">
+                Matched Topics:{" "}
+                {selectedMatch.Topics?.filter((topic) =>
+                  profile.Topics?.some(
+                    (userTopic) => userTopic.toLowerCase() === topic.toLowerCase()
+                  )
+                ).map((t, i) => (
+                  <span key={i} className="bg-purple-600 px-3 py-1 rounded-full text-sm text-white">
+                    {t}
+                  </span>
+                )) || <p className="text-gray-400">No matched topics</p>}
+              </div>
+
+              {/* Like / Skip buttons */}
+              <div className="flex gap-6 mt-6">
+            {/* Like Button */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              onClick={() => handleLike(selectedMatch.$id)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full 
+                        bg-gradient-to-r from-green-500 to-green-600 
+                        hover:from-green-600 hover:to-green-700 
+                        shadow-lg shadow-green-500/30 
+                        transition text-white font-semibold"
+            >
+              <ThumbsUp size={20} className="text-white" />
+              Like
+            </motion.button>
+
+            {/* Skip Button */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              onClick={() => handleDislike(selectedMatch.$id)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full 
+                        bg-gradient-to-r from-red-500 to-red-600 
+                        hover:from-red-600 hover:to-red-700 
+                        shadow-lg shadow-red-500/30 
+                        transition text-white font-semibold"
+            >
+              <ThumbsDown size={20} className="text-white" />
+              Skip
+            </motion.button>
+          </div>
+
+            </motion.div>
+          </motion.div>
+        )}
 
         {!loading && hasSearched && matches.length === 0 && !error && (
           <p className="text-gray-400 mt-4">No matches found. 🔄 Try again.</p>
