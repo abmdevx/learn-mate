@@ -63,7 +63,9 @@ export class MatchService {
       // Sort descending (best → worst)
       ranked.sort((a, b) => b.score - a.score);
 
-      return ranked; // 👈 return all matches
+      const filtered = ranked.filter((c) => c.score > 0);
+
+      return filtered; // 👈 return all matches
     } catch (error) {
       console.error("❌ Error finding match:", error);
       throw error;
