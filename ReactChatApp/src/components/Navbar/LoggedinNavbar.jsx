@@ -5,8 +5,70 @@ import { useState, useEffect, useRef } from "react";
 import { logoutUser } from "../../Redux/AuthThunks";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import notificationService from "../../appwrite/notifications";
+import authService from "../../appwrite/auth";
 
 const UserNavbar = () => {
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const user = useSelector((state) => state.auth.userData);
+
+  const fetchNotifications = async () => {
+    const count = await notificationService.getUnreadCount(user.$id);
+    setUnreadCount(count);
+  };
+
+  const openNotifications = async () => {
+    setNotifOpen(!notifOpen);
+
+    if (!notifOpen) {
+      const notifs = await notificationService.getUserNotifications(user.$id);
+
+      // 🔹 Fetch usernames for all senderIds in notifications
+      const notificationsWithNames = await Promise.all(
+        notifs.map(async (n) => {
+          try {
+            console.log("senderid ja rahi ha? ", n.SenderId);
+            const senderProfile = await authService.getProfile(n.SenderId);
+            return {
+              ...n,
+              senderName: senderProfile?.Name || "Unknown User",
+            };
+          } catch {
+            return { ...n, senderName: "Unknown User" };
+          }
+        })
+      );
+
+      setNotifications(notificationsWithNames);
+
+      await notificationService.markAllAsRead(user.$id);
+      setUnreadCount(0);
+    }
+  };
+
+  useEffect(() => {
+    if (!user?.$id) return;
+    fetchNotifications();
+
+    // Optional: poll every 10s
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".notif-dropdown") && notifOpen) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [notifOpen]);
+
+
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null); // ✅ ref for dropdown
@@ -92,17 +154,46 @@ const UserNavbar = () => {
               </motion.div>
             ))}
 
-            {/* Notifications */}
-            {/* <motion.button
+            <div className="relative">
+            {/* Notification Button */}
+            <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
+              onClick={openNotifications}
               className="relative text-gray-300 hover:text-orange-500"
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 bg-orange-500 text-xs text-white rounded-full px-1">
-                3
-              </span>
-            </motion.button> */}
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 bg-orange-500 text-xs text-white rounded-full px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </motion.button>
+
+            {/* Notification Dropdown */}
+            {notifOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute right-0 mt-3 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50"
+              >
+                {notifications.length > 0 ? (
+                  notifications.map((n) => (
+                    <div key={n.$id} className="px-4 py-2 hover:bg-gray-700">
+                      {n.senderName} liked your profile!
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-gray-400 text-sm text-center">
+                    No new notifications
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
+
+            
 
             {/* Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>

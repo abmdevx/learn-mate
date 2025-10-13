@@ -1,6 +1,6 @@
 import conf from "../config/ConfigID";
 import { Client, TablesDB, Query, ID } from "appwrite";
-
+import notificationService from "./notifications.js";
 export class MatchService {
   client = new Client();
   tables;
@@ -17,7 +17,7 @@ export class MatchService {
   // 🔍 1) Find and rank all potential matches
   async findMatch(currentUserId) {
     try {
-      // Get current user's profile (row)
+      // Get current user's profile
       const user = await this.tables.getRow({
         databaseId: conf.appwriteDatabaseId,
         tableId: conf.appwriteUsersCollectionId,
@@ -26,13 +26,15 @@ export class MatchService {
 
       if (!user) return [];
 
-      // Search for other users excluding self
+      // Get user's match document to exclude already liked/matched users
+      const userMatchDoc = await this.getMatchDocByUserId(currentUserId);
+      const alreadyMatchedIds = userMatchDoc?.MatchedUsers || [];
+
+      // Fetch all other users
       const matches = await this.tables.listRows({
         databaseId: conf.appwriteDatabaseId,
         tableId: conf.appwriteUsersCollectionId,
-        queries: [
-          Query.notEqual("$id", currentUserId),
-        ],
+        queries: [Query.notEqual("$id", currentUserId)],
       });
 
       if (matches.total === 0) return [];
@@ -40,32 +42,24 @@ export class MatchService {
       // 🧮 Score function
       const calcScore = (candidate) => {
         let score = 0;
-
-        // Shared topics/skills
         const sharedTopics = candidate.Topics?.filter((t) =>
-          user.Topics?.some(ut => ut.toLowerCase() === t.toLowerCase())
+          user.Topics?.some((ut) => ut.toLowerCase() === t.toLowerCase())
         ) || [];
-
         score += sharedTopics.length * 5;
-
-        // Same level
-        if (candidate.Level === user.Level) score += 3;
-
         return score;
       };
 
-      // Rank candidates
-      const ranked = matches.rows.map((c) => ({
-        ...c,
-        score: calcScore(c),
-      }));
+      // Rank and filter
+      const ranked = matches.rows
+        .filter((c) => !alreadyMatchedIds.includes(c.$id)) // ✅ Exclude already matched users
+        .map((c) => ({
+          ...c,
+          score: calcScore(c),
+        }))
+        .filter((c) => c.score > 0) // remove non-relevant users
+        .sort((a, b) => b.score - a.score);
 
-      // Sort descending (best → worst)
-      ranked.sort((a, b) => b.score - a.score);
-
-      const filtered = ranked.filter((c) => c.score > 0);
-
-      return filtered; // 👈 return all matches
+      return ranked;
     } catch (error) {
       console.error("❌ Error finding match:", error);
       throw error;
@@ -144,7 +138,7 @@ async upsertMatchDoc(userId, level, matchedUserId, commonTopics) {
     });
   } else {
     // Update existing
-    const doc = userDoc.documents[0];
+    const doc = userDoc.rows[0];
     await this.tables.updateRow({
       databaseId: conf.appwriteDatabaseId,
       tableId: conf.appwritematchesCollectionId,
@@ -174,8 +168,9 @@ async saveLikedMatch(currentUserId, matchedUserId) {
     // 3. Update current user's match record
     await this.upsertMatchDoc(currentUserId, currentUser.Level, matchedUserId, commonTopics);
     
+    await notificationService.sendLikeNotification(currentUserId, matchedUserId)
     // 4. Update matched user's match record
-    await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
+    // await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
 
     return { success: true };
   } catch (error) {
