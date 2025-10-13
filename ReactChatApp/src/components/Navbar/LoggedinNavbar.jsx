@@ -155,46 +155,43 @@ const UserNavbar = () => {
             ))}
 
             <div className="relative">
-            {/* Notification Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={openNotifications}
-              className="relative text-gray-300 hover:text-orange-500"
-            >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 bg-orange-500 text-xs text-white rounded-full px-1">
-                  {unreadCount}
-                </span>
-              )}
-            </motion.button>
-
-            {/* Notification Dropdown */}
-            {notifOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute right-0 mt-3 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50"
+              {/* Notification Button */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={openNotifications}
+                className="relative text-gray-300 hover:text-orange-500"
               >
-                {notifications.length > 0 ? (
-                  notifications.map((n) => (
-                    <div key={n.$id} className="px-4 py-2 hover:bg-gray-700">
-                      {n.senderName} liked your profile!
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-gray-400 text-sm text-center">
-                    No new notifications
-                  </div>
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-orange-500 text-xs text-white rounded-full px-1">
+                    {unreadCount}
+                  </span>
                 )}
-              </motion.div>
-            )}
-          </div>
+              </motion.button>
 
-            
-
+              {/* Notification Dropdown */}
+              {notifOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-3 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50"
+                >
+                  {notifications.length > 0 ? (
+                    notifications.map((n) => (
+                      <div key={n.$id} className="px-4 py-2 hover:bg-gray-700">
+                        {n.senderName} liked your profile!
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-gray-400 text-sm text-center">
+                      No new notifications
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </div>
             {/* Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <motion.button
