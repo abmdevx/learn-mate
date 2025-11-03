@@ -30,7 +30,6 @@ const UserNavbar = () => {
       const notificationsWithNames = await Promise.all(
         notifs.map(async (n) => {
           try {
-            console.log("senderid ja rahi ha? ", n.SenderId);
             const senderProfile = await authService.getProfile(n.SenderId);
             return {
               ...n,
@@ -86,6 +85,12 @@ const UserNavbar = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const handleNotificationClick = (senderId) => {
+    setNotifOpen(false); // Close dropdown
+    console.log("ider aa rahay ho kia ?", senderId);
+    navigate(`/user/${senderId}`); // Navigate to sender's profile
+  };
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
@@ -162,7 +167,7 @@ const UserNavbar = () => {
                 onClick={openNotifications}
                 className="relative text-gray-300 hover:text-orange-500"
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="h-5 w-5 mt-2" />
                 {unreadCount > 0 && (
                   <span className="absolute top-0 right-0 bg-orange-500 text-xs text-white rounded-full px-1">
                     {unreadCount}
@@ -176,11 +181,16 @@ const UserNavbar = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-3 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50"
+                  className="notif-dropdown absolute right-0 mt-3 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50"
                 >
                   {notifications.length > 0 ? (
                     notifications.map((n) => (
-                      <div key={n.$id} className="px-4 py-2 hover:bg-gray-700">
+                      <div key={n.$id}
+                       onClick={() => {
+                       console.log("Notification clicked:", n);
+                        handleNotificationClick(n.SenderId || n.senderId);
+                       }}
+                      className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
                         {n.senderName} liked your profile!
                       </div>
                     ))

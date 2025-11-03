@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import Match from "./components/Matches/Match";
 import FindMatchPage from "./components/Matches/FindMatches";
 import Settings from "./pages/Settings";
+import UserProfile from "./components/Matches/UserProfile";
 import "./index.css"; // your custom styles (optional)
 
 const router = createBrowserRouter([
@@ -52,6 +53,7 @@ const router = createBrowserRouter([
           { path: "/settings", element: <Settings /> },
           { path: "/match", element: <Match /> },
           { path: "/find-match", element: <FindMatchPage /> },
+          { path: "/user/:id", element: <UserProfile /> },
         ],
       },
     ],
