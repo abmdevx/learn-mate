@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import ReactNiceAvatar from "react-nice-avatar";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
+import { ThumbsUp } from "lucide-react";
+import matchService from "../../appwrite/matches";
 
 const UserProfile = () => {
   const { id } = useParams();
@@ -25,6 +27,19 @@ const UserProfile = () => {
     };
     fetchProfiles();
   }, [id, userData]);
+
+  const handleLike = async (matchId) => {
+    try {
+      const currentUserId = userData.$id;
+      console.log("Saving match:", currentUserId, matchId);
+      await matchService.saveLikedMatch(currentUserId, matchId);
+      alert("✅ Match saved!");
+    } catch (error) {
+      alert("❌ Failed to save match.");
+      console.error("❌ Error saving match:", error.message || error);
+      throw error;
+    }
+  };
 
     if (!profile) {
     return (
@@ -68,71 +83,84 @@ const UserProfile = () => {
     ) || [];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-  {/* 🔸 Avatar + Name + Email Animation */}
-  <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6 }}
-    className="flex items-center gap-6 mb-8 justify-center mt-15"
-  >
-    {profile?.Avatar && (
-      <ReactNiceAvatar
-        style={{ width: "120px", height: "120px" }}
-        {...JSON.parse(profile.Avatar)}
-      />
-    )}
-    <div>
-      <h1 className="text-3xl font-bold text-orange-500">{profile.Name}</h1>
-      <p className="text-gray-400">{profile.Email}</p>
-    </div>
-  </motion.div>
-
-  {/* 🔸 Matched Topics Animation */}
-  <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay: 0.2 }} // small delay for smooth sequence
-    className="flex flex-col items-center gap-3"
-  >
-    <h2 className="text-lg font-semibold text-orange-500">
-      Matched Topics
-    </h2>
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
+    {/* 🔸 Avatar + Name + Email Animation */}
     <motion.div
-      className="flex flex-wrap gap-2 justify-center"
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            staggerChildren: 0.05, // 🔹 each topic animates slightly after the previous
-          },
-        },
-      }}
-      initial="hidden"
-      animate="visible"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="flex items-center gap-6 mb-8 justify-center mt-15"
     >
-      {matchedTopics.length > 0 ? (
-        matchedTopics.map((t, i) => (
-          <motion.span
-            key={i}
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 1, y: 0 },
-            }}
-            className="bg-purple-600 px-3 py-1 rounded-full text-sm text-white"
-          >
-            {t}
-          </motion.span>
-        ))
-      ) : (
-        <p className="text-gray-400">No matched topics</p>
+      {profile?.Avatar && (
+        <ReactNiceAvatar
+          style={{ width: "120px", height: "120px" }}
+          {...JSON.parse(profile.Avatar)}
+        />
       )}
+      <div>
+        <h1 className="text-3xl font-bold text-orange-500">{profile.Name}</h1>
+        <p className="text-gray-400">{profile.Email}</p>
+      </div>
     </motion.div>
-  </motion.div>
-</div>
 
+    {/* 🔸 Matched Topics Animation */}
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.2 }} // small delay for smooth sequence
+      className="flex flex-col items-center gap-3"
+    >
+      <h2 className="text-lg font-semibold text-orange-500">
+        Matched Topics
+      </h2>
+      <motion.div
+        className="flex flex-wrap gap-2 justify-center"
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              staggerChildren: 0.05, // 🔹 each topic animates slightly after the previous
+            },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        {matchedTopics.length > 0 ? (
+          matchedTopics.map((t, i) => (
+            <motion.span
+              key={i}
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              className="bg-purple-600 px-3 py-1 rounded-full text-sm text-white"
+            >
+              {t}
+            </motion.span>
+          ))
+        ) : (
+          <p className="text-gray-400">No matched topics</p>
+        )}
+      </motion.div>
+      {/* Like Button */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        onClick={() => handleLike(profile.$id)}
+        className="flex items-center gap-2 px-5 py-2.5 mt-4 rounded-full 
+        bg-gradient-to-r from-green-500 to-green-600 
+        hover:from-green-600 hover:to-green-700 
+        shadow-lg shadow-green-500/30 
+        transition text-white font-semibold"
+      >
+        <ThumbsUp size={20} className="text-white" />
+        Like
+      </motion.button>
+    </motion.div>
+  </div>
   );
 };
 
