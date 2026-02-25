@@ -191,7 +191,10 @@ export default function Dashboard() {
             Timezone: {" "}{selectedUser.Timezone || "Timezone not set"}
           </p>
 
-          <button className="mt-4 w-full bg-green-500 rounded-lg py-2">
+          <button 
+          className="mt-4 w-full bg-green-500 rounded-lg py-2"
+          onClick={() => navigate(`/messages/${selectedUser.$id}`)}          
+          >
             Message {selectedUser.Name}
           </button>
         </div>

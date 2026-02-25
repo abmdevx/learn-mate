@@ -20,6 +20,8 @@ import Match from "./components/Matches/Match";
 import FindMatchPage from "./components/Matches/FindMatches";
 import Settings from "./pages/Settings";
 import UserProfile from "./components/Matches/UserProfile";
+import MessageChat from "./components/Messages/MessageChat";
+import MessageDashboard from "./components/Messages/MessageDashboard";
 import "./index.css"; // your custom styles (optional)
 
 const router = createBrowserRouter([
@@ -54,6 +56,8 @@ const router = createBrowserRouter([
           { path: "/match", element: <Match /> },
           { path: "/find-match", element: <FindMatchPage /> },
           { path: "/user/:id", element: <UserProfile /> },
+          { path: "/messages", element: <MessageDashboard /> },
+          { path: "/messages/:userId", element: <MessageChat /> },
         ],
       },
     ],
