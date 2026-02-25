@@ -11,6 +11,7 @@ export default function Dashboard() {
   const { userData } = useSelector((state) => state.auth);
   const [profile, setProfile] = useState(null);
   const [MatchedProfiles, setMatchedProfiles] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -117,7 +118,8 @@ export default function Dashboard() {
           {MatchedProfiles.map((match) => (
             <div
               key={match.$id}
-              className="flex flex-col items-center w-20"
+              className="flex flex-col items-center w-20 cursor-pointer"
+              onClick={() => setSelectedUser(match)}
             >
               {match.Avatar ? (
                 <ReactNiceAvatar
@@ -137,6 +139,55 @@ export default function Dashboard() {
         </div>
       )}
     </div>
+
+    {selectedUser && (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 p-6 rounded-xl w-72 relative flex flex-col items-center text-center">
+      {/* Close */}
+      <button
+        className="absolute top-2 right-2 text-gray-400"
+        onClick={() => setSelectedUser(null)}
+      >
+        ✕
+      </button>
+
+      {/* Avatar */}
+          {selectedUser.Avatar ? (
+            <ReactNiceAvatar
+              style={{ width: "72px", height: "72px" }}
+              {...JSON.parse(selectedUser.Avatar)}
+            />
+          ) : (
+            <div className="w-[72px] h-[72px] rounded-full bg-gray-600 flex items-center justify-center text-xl font-bold">
+              {selectedUser.Name?.[0]}
+            </div>
+          )}
+
+          {/* Info */}
+          <h4 className="mt-3 text-lg font-semibold">{selectedUser.Name}</h4>
+
+          <p className="text-gray-400 text-sm">
+            Email: {" "}{selectedUser.Email || "Department not set"}
+          </p>
+
+          <p className="text-gray-400 text-sm">
+            Level: {" "}{selectedUser.Level || "Level not set"}
+          </p>
+
+          <p className="text-gray-400 text-sm">
+            Status: {" "}{selectedUser.Status || "Level not set"}
+          </p>
+
+          <p className="text-gray-400 text-sm">
+            Timezone: {" "}{selectedUser.Timezone || "Level not set"}
+          </p>
+
+          <button className="mt-4 w-full bg-green-500 rounded-lg py-2">
+            Message {selectedUser.Name}
+          </button>
+        </div>
+      </div>
+    )}
 
       {/* CTA Section */}
       <div className="bg-gray-800 p-6 rounded-2xl shadow flex flex-col md:flex-row items-center justify-between gap-4">
