@@ -97,6 +97,10 @@ const UserNavbar = () => {
 
   const handleLogout = async () => {
     try {
+      if(user?.$id)
+      {
+          await authService.updateProfile(user.$id, { Status: "offline" })
+      }
       await dispatch(logoutUser()).unwrap();
       navigate("/");
     } catch (error) {
