@@ -174,12 +174,21 @@ export default function Dashboard() {
             Level: {" "}{selectedUser.Level || "Level not set"}
           </p>
 
-          <p className="text-gray-400 text-sm">
-            Status: {" "}{selectedUser.Status || "Level not set"}
+          <p className="text-sm text-gray-400">
+            Status:{" "}
+            <span
+              className={`${
+                selectedUser?.Status === "online"
+                  ? "text-green-500"
+                  : "text-red-500"
+              }`}
+            >
+              {selectedUser?.Status || "Status not set"}
+            </span>
           </p>
 
           <p className="text-gray-400 text-sm">
-            Timezone: {" "}{selectedUser.Timezone || "Level not set"}
+            Timezone: {" "}{selectedUser.Timezone || "Timezone not set"}
           </p>
 
           <button className="mt-4 w-full bg-green-500 rounded-lg py-2">

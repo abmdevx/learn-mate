@@ -121,7 +121,10 @@ function Profile() {
                 name="Level"
                 control={control}
                 render={({ field }) => (
-                  <InputField placeholder="Level" {...field} />
+                  <InputField 
+                  placeholder="Level" {...field} 
+                  className="cursor-not-allowed" 
+                  />
                 )}
               />
               <Controller

@@ -7,6 +7,7 @@ import ReactNiceAvatar from "react-nice-avatar";
 import authService from "../../appwrite/auth";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // ✅ Add this import
+import Toast from "../Shared/Toast";
 
 export default function FindMatchPage() {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,11 @@ export default function FindMatchPage() {
   const [profile, setProfile] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const navigate = useNavigate();
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const { userData } = useSelector((state) => state.auth);
 
@@ -57,16 +63,22 @@ export default function FindMatchPage() {
       const currentUserId = userData.$id;
       console.log("Saving match:", currentUserId, matchId);
       await matchService.saveLikedMatch(currentUserId, matchId);
-      alert("✅ Match saved!");
+
+      setToast({
+        show: true,
+        message: "Match saved successfully!",
+        type: "success",
+      });
+
     } catch (error) {
-      alert("❌ Failed to save match.");
+      setToast({
+        show: true,
+        message: "Failed to save match.",
+        type: "error",
+      });
       console.error("❌ Error saving match:", error.message || error);
       throw error;
     }
-  };
-
-  const handleDislike = (matchId) => {
-    alert("❌ Skipped match!");
   };
 
   return (
@@ -79,10 +91,10 @@ export default function FindMatchPage() {
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate("/match")}
           className="absolute top-6 left-6 flex items-center gap-2 
-                    bg-gray-800/60 border border-gray-700/40 
-                    hover:bg-gray-700/60 text-gray-300 
-                    px-4 py-2 rounded-xl shadow-md 
-                    transition-all duration-200 mt-13"
+          bg-gray-800/60 border border-gray-700/40 
+          hover:bg-gray-700/60 text-gray-300 
+          px-4 py-2 rounded-xl shadow-md 
+          transition-all duration-200 mt-13"
         >
           <ArrowLeft size={18} />
           Back
@@ -238,6 +250,13 @@ export default function FindMatchPage() {
           Not satisfied? Try Again
         </motion.button>
       )}
+
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </div>
   );
 }
