@@ -6,12 +6,19 @@ import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import { ThumbsUp } from "lucide-react";
 import matchService from "../../appwrite/matches";
+import Toast from "../Shared/Toast";
 
 const UserProfile = () => {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [currentProfile, setCurrentProfile] = useState(null);
   const { userData } = useSelector((state) => state.auth); // this has only Appwrite account info
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -33,9 +40,19 @@ const UserProfile = () => {
       const currentUserId = userData.$id;
       console.log("Saving match:", currentUserId, matchId);
       await matchService.saveLikedMatch(currentUserId, matchId);
-      alert("✅ Match saved!");
+
+      setToast({
+        show: true,
+        message: "Match saved successfully!",
+        type: "success",
+      });
+
     } catch (error) {
-      alert("❌ Failed to save match.");
+      setToast({
+        show: true,
+        message: "Failed to save match.",
+        type: "error",
+      });
       console.error("❌ Error saving match:", error.message || error);
       throw error;
     }
@@ -160,6 +177,12 @@ const UserProfile = () => {
         Like
       </motion.button>
     </motion.div>
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
   </div>
   );
 };
