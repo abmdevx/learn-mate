@@ -210,21 +210,6 @@ export default function FindMatchPage() {
               <ThumbsUp size={20} className="text-white" />
               Like
             </motion.button>
-
-            {/* Skip Button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={() => handleDislike(selectedMatch.$id)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full 
-                        bg-gradient-to-r from-red-500 to-red-600 
-                        hover:from-red-600 hover:to-red-700 
-                        shadow-lg shadow-red-500/30 
-                        transition text-white font-semibold"
-            >
-              <ThumbsDown size={20} className="text-white" />
-              Skip
-            </motion.button>
           </div>
 
             </motion.div>
