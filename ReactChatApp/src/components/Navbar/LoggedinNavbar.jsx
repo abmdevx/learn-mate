@@ -144,7 +144,7 @@ const UserNavbar = () => {
           <div className="hidden md:flex items-center space-x-6">
             {[ 
               { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-              { to: "/features", label: "Features", icon: <Layers className="h-5 w-5" /> },
+              { to: "/messages", label: "Messages", icon: <Layers className="h-5 w-5" /> },
             ].map((item, index) => (
               <motion.div
                 key={item.label}
@@ -281,7 +281,7 @@ const UserNavbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 bg-gray-900 border-t border-gray-800">
             {[
               { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-              { to: "/features", label: "Features", icon: <Layers className="h-5 w-5" /> },
+              { to: "/messages", label: "Messages", icon: <Layers className="h-5 w-5" /> },
             ].map((item, index) => (
               <motion.div
                 key={item.label}

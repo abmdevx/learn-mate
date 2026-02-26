@@ -118,7 +118,7 @@ useEffect(() => {
         selectedUser.$id
       );
 
-      const msg = await messageService.sendMessage({
+      await messageService.sendMessage({
         matchId: match.$id,
         senderId: userData.$id,
         message: newMessage,
