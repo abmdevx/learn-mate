@@ -134,6 +134,7 @@ async upsertMatchDoc(userId, level, matchedUserId, commonTopics) {
         Level: level,
         MatchedUsers: [matchedUserId],
         MatchedTopics: commonTopics,
+        Participants: [userId, matchedUserId], // ✅ Add participants here
       },
     });
   } else {
@@ -146,6 +147,7 @@ async upsertMatchDoc(userId, level, matchedUserId, commonTopics) {
       data: {
         MatchedUsers: [...new Set([...(doc.MatchedUsers || []), matchedUserId])],
         MatchedTopics: [...new Set([...(doc.MatchedTopics || []), ...commonTopics])],
+        Participants: [...new Set([...(doc.Participants || []), userId, matchedUserId])], // ✅ Ensure both users are included
       },
     });
   }
@@ -178,6 +180,25 @@ async saveLikedMatch(currentUserId, matchedUserId) {
     throw error;
   }
 }
+
+    // Get the match document that includes both users
+    async getMatchBetweenUsers(userId1, userId2) {
+      try {
+        const res = await this.tables.listRows({
+          databaseId: conf.appwriteDatabaseId,
+          tableId: conf.appwritematchesCollectionId,
+          queries: [
+            Query.contains("Participants", userId1),
+            Query.contains("Participants", userId2),
+          ],
+        });
+
+        return res.rows[0] || null; // returns the match document
+      } catch (err) {
+        console.error("❌ Error fetching match between users:", err);
+        return null;
+      }
+    }
 
 }
 

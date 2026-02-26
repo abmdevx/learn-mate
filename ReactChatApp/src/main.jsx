@@ -57,7 +57,7 @@ const router = createBrowserRouter([
           { path: "/find-match", element: <FindMatchPage /> },
           { path: "/user/:id", element: <UserProfile /> },
           { path: "/messages", element: <MessageDashboard /> },
-          { path: "/messages/:userId", element: <MessageChat /> },
+          { path: "/messages/:userId", element: <MessageDashboard /> },
         ],
       },
     ],
