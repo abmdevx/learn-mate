@@ -21,9 +21,17 @@ Connect with learners worldwide, set your own schedule, and grow together.
 
 ---
 
-## 📜 License
+## 📜 License & Usage
 
-Copyright (c) 2025 Abdullah Butt. All rights reserved.  
+This project is **proprietary and confidential**.
 
-This project is **proprietary and confidential**.  
-Unauthorized copying, distribution, modification, or use of this code, in whole or in part, is **strictly prohibited** without prior written permission from the author.
+You are welcome to:
+- ⭐ View and explore the code.
+- 🍴 Fork the repository.
+- 🤝 Submit pull requests and contribute.
+
+However, you are **NOT allowed to**:
+- ❌ Copy or reuse this project’s core idea, architecture, or code for your own projects.
+- ❌ Distribute, modify, or use this code for commercial or personal purposes outside this repository.
+
+Any unauthorized use of this project, in whole or in part, is **strictly prohibited** without prior written permission from the author.
