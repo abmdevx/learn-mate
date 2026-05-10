@@ -28,6 +28,7 @@ export default function Dashboard() {
     const fetchProfile = async () => {
       if (!userData?.$id) return;
       const res = await authService.getProfile(userData.$id);
+      await authService.updateProfile(userData.$id, { Status: "online" });
       console.log(res);
       console.log(userData);
       setProfile(res);
