@@ -101,7 +101,7 @@ const UserProfile = () => {
 
   return (
   <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-    {/* 🔸 Avatar + Name + Email Animation */}
+    {/* 🔸 Avatar + Name Animation */}
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
@@ -116,7 +116,6 @@ const UserProfile = () => {
       )}
       <div>
         <h1 className="text-3xl font-bold text-orange-500">{profile.Name}</h1>
-        <p className="text-gray-400">{profile.Email}</p>
       </div>
     </motion.div>
 

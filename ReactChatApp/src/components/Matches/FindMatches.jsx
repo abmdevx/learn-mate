@@ -186,9 +186,6 @@ export default function FindMatchPage() {
               {/* Name + details */}
               <h2 className="text-xl font-semibold mt-2 text-white">{selectedMatch.Name}</h2>
               <p className="text-orange-500 font-bold">
-                Email: <span className="text-white">{selectedMatch.Email}</span>
-              </p>
-              <p className="text-orange-500 font-bold">
                 Level: <span className="text-white">{selectedMatch.Level}</span>
               </p>
 

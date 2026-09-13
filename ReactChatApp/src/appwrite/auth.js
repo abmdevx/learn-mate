@@ -47,7 +47,6 @@ export class AuthService {
             rowId: userId,
             data: {
               Name: name,
-              Email: email,
               Level: level || "Beginner",
               Availability: availability || "Available",
               Timezone: timezone || "UTC",
@@ -128,23 +127,19 @@ export class AuthService {
     }
   }
 
-  async checkEmailOrUsernameExists(email, username) {
+  async checkUsernameExists(username) {
     try {
       const response = await this.tables.listRows({
         databaseId: conf.appwriteDatabaseId,
         tableId: conf.appwriteUsersCollectionId,
         queries: [
-          Query.or([
-            Query.equal("Email", email),
-            Query.equal("Name", username)
-          ])
+          Query.equal("Name", username)
         ],
       });
 
-      const exists = { email: false, username: false };
+      const exists = { username: false };
 
       response.rows.forEach(row => {
-        if (row.Email === email) exists.email = true;
         if (row.Name === username) exists.username = true;
       });
 
@@ -173,6 +168,37 @@ export class AuthService {
       return true;
     } catch (error) {
       console.error("❌ Error deleting account:", error);
+      throw error;
+    }
+  }
+
+// ✅ Send password recovery email
+  async createPasswordRecovery(email, recoveryUrl) {
+    try {
+      const response = await this.account.createRecovery({
+        email,
+        url: recoveryUrl,
+      });
+
+      return response;
+    } catch (error) {
+      console.error("❌ Error creating password recovery:", error);
+      throw error;
+    }
+  }
+
+  // ✅ Complete password recovery
+  async updatePasswordRecovery(userId, secret, password) {
+    try {
+      const response = await this.account.updateRecovery({
+        userId,
+        secret,
+        password,
+      });
+
+      return response;
+    } catch (error) {
+      console.error("❌ Error updating password recovery:", error);
       throw error;
     }
   }

@@ -7,21 +7,33 @@ import { useSelector } from "react-redux";
 import { checkSession } from "./Redux/AuthThunks";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import Loader from "./Loader";
+
+const MIN_INITIAL_LOADER_TIME = 1500;
 
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(checkSession());
+    const loaderStartedAt = Date.now();
+
+    dispatch(checkSession()).finally(() => {
+      const initialLoader = document.getElementById("initial-loader");
+      if (!initialLoader) return;
+
+      const elapsedTime = Date.now() - loaderStartedAt;
+      const remainingTime = Math.max(0, MIN_INITIAL_LOADER_TIME - elapsedTime);
+
+      setTimeout(() => {
+        initialLoader.classList.add("fade-out");
+        setTimeout(() => initialLoader.remove(), 600);
+      }, remainingTime);
+    });
   }, [dispatch]);
 
-  const { userData, loading } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
   console.log("Current user in App.jsx:", userData);
   
   const isLoggedIn = !!userData;
-
-  if (loading) return <Loader />;
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import ReactNiceAvatar from "react-nice-avatar";
 import { motion } from "framer-motion";
-import { RefreshCcwIcon, Pencil } from "lucide-react";
+import { Pencil, Save, X } from "lucide-react";
 import authService from "../appwrite/auth";
 import InputField from "../components/Shared/InputField";
 import TagsInput from "../components/Shared/TagsInput";
@@ -20,7 +20,7 @@ function Profile() {
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   // RHF
-  const { control, handleSubmit, reset } = useForm();
+  const { control, handleSubmit, reset, formState: { isDirty } } = useForm();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -51,6 +51,7 @@ function Profile() {
       await authService.updateProfile(profile.$id, data);
       setToast({ show: true, message: "Profile updated successfully!", type: "success" });
       setProfile({ ...profile, ...data });
+      reset(data);
       setEditPersonal(false);
       setEditBio(false);
       setEditTopics(false);
@@ -79,23 +80,38 @@ function Profile() {
           <h1 className="text-3xl font-bold text-orange-500">
             {profile.Name}
           </h1>
-          <p className="text-gray-400">{profile.Email}</p>
+          <p className="text-gray-400">{userData.email}</p>
         </div>
       </motion.div>
 
-      {/* Master Update button */}
-      <div className="flex justify-center mb-10">
-        <motion.button
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 , delay: 0.1 }}
-          onClick={handleSubmit(onSubmit)}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md cursor-pointer"
-        >
-          <RefreshCcwIcon className="w-5 h-5" />
-          Update Profile
-        </motion.button>
-      </div>
+      {isDirty && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 p-4 bg-gray-800 border border-orange-500 rounded-xl">
+          <p className="text-sm text-gray-200">You have unsaved profile changes. Save them?</p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                reset(profile);
+                setEditPersonal(false);
+                setEditBio(false);
+                setEditTopics(false);
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-200 border border-gray-600 rounded-lg hover:bg-gray-700"
+            >
+              <X className="w-4 h-4" />
+              Discard
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-orange-500 text-gray-900 rounded-lg font-semibold hover:bg-orange-600"
+            >
+              <Save className="w-4 h-4" />
+              Save changes
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Info Section */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -121,17 +137,33 @@ function Profile() {
                 name="Level"
                 control={control}
                 render={({ field }) => (
-                  <InputField 
-                  placeholder="Level" {...field} 
-                  className="cursor-not-allowed" 
-                  />
+                  <select
+                    {...field}
+                    className="w-full px-3 py-2 rounded-lg bg-gray-900 text-white focus:outline-none"
+                  >
+                    <option value="">Select level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Expert">Expert</option>
+                  </select>
                 )}
               />
               <Controller
                 name="Availability"
                 control={control}
                 render={({ field }) => (
-                  <InputField placeholder="Availability" {...field} />
+                  <select
+                    {...field}
+                    className="w-full px-3 py-2 rounded-lg bg-gray-900 text-white focus:outline-none"
+                  >
+                    <option value="">Select availability</option>
+                    <option value="Flexible">Flexible</option>
+                    <option value="Weekday mornings">Weekday mornings</option>
+                    <option value="Weekday afternoons">Weekday afternoons</option>
+                    <option value="Weekday evenings">Weekday evenings</option>
+                    <option value="Weekends">Weekends</option>
+                    <option value="Weekends evenings">Weekends evenings</option>
+                  </select>
                 )}
               />
               <Controller

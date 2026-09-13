@@ -9,7 +9,16 @@ import ReactNiceAvatar from "react-nice-avatar";
 
 export default function Dashboard() {
   const { userData } = useSelector((state) => state.auth);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => {
+    if (!userData?.$id) return {};
+
+    try {
+      return JSON.parse(sessionStorage.getItem(`profile-${userData.$id}`)) || {};
+    } catch {
+      return {};
+    }
+  });
+  const [profileError, setProfileError] = useState(false);
   const [MatchedProfiles, setMatchedProfiles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -27,11 +36,18 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userData?.$id) return;
-      const res = await authService.getProfile(userData.$id);
-      await authService.updateProfile(userData.$id, { Status: "online" });
-      console.log(res);
-      console.log(userData);
-      setProfile(res);
+      try {
+        const res = await authService.getProfile(userData.$id);
+        setProfile(res);
+        sessionStorage.setItem(`profile-${userData.$id}`, JSON.stringify(res));
+        authService.updateProfile(userData.$id, { Status: "online" }).catch((error) => {
+          console.error("Failed to update online status:", error);
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard profile:", error);
+        setProfileError(true);
+        setProfile({});
+      }
     };
 
     fetchProfile();
@@ -39,37 +55,6 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
 
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="animate-pulse space-y-6 w-full max-w-4xl px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-gray-800 p-6 rounded-2xl shadow flex flex-col gap-3"
-              >
-                <div className="h-5 w-1/3 bg-gray-700 rounded"></div>
-                <div className="h-6 w-1/2 bg-gray-700 rounded"></div>
-              </div>
-            ))}
-          </div>
-          <div className="bg-gray-800 p-6 rounded-2xl shadow">
-            <div className="h-5 w-1/4 bg-gray-700 rounded mb-3"></div>
-            <div className="h-4 w-2/3 bg-gray-700 rounded"></div>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-2xl shadow flex flex-col md:flex-row gap-4">
-            <div className="flex-1 space-y-3">
-              <div className="h-5 w-1/3 bg-gray-700 rounded"></div>
-              <div className="h-4 w-2/3 bg-gray-700 rounded"></div>
-            </div>
-            <div className="h-10 w-40 bg-gray-700 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
   return (
       <div className="min-h-screen bg-gray-900 text-white flex flex-col px-6 pt-6">
       {/* Stats Cards */}
@@ -103,7 +88,12 @@ export default function Dashboard() {
       </div>
 
       {/* Matches Section */}
-    <div className="bg-gray-800 p-6 rounded-2xl shadow mb-8">
+        <div className="bg-gray-800 p-6 rounded-2xl shadow mb-8">
+        {profileError && (
+          <p className="mb-4 text-sm text-yellow-300">
+            Some profile details could not be loaded. You can still use your dashboard.
+          </p>
+        )}
         <div className="flex items-center gap-3 mb-4">
           <Users className="text-green-400 h-6 w-6" />
           <h3 className="text-lg font-semibold">Your Matches</h3>
@@ -166,10 +156,6 @@ export default function Dashboard() {
 
           {/* Info */}
           <h4 className="mt-3 text-lg font-semibold">{selectedUser.Name}</h4>
-
-          <p className="text-gray-400 text-sm">
-            Email: {" "}{selectedUser.Email || "Department not set"}
-          </p>
 
           <p className="text-gray-400 text-sm">
             Level: {" "}{selectedUser.Level || "Level not set"}

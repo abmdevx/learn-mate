@@ -7,6 +7,7 @@ import App from "./App";
 import Home from "./components/Home";
 import LoginPage from "./pages/LoginPage";
 import SignupWizard from "./components/SignupComponents/SignupWizard";
+import ResetPassword from "./pages/ResetPassword";
 import About from "./pages/About";
 import Features from "./pages/Features";
 import Copyright from "./pages/Copyright";
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
           { path: "login", element: <PublicRoute> <LoginPage /> </PublicRoute> },
           { path: "signup", element: <PublicRoute> <SignupWizard /> </PublicRoute> },
           { path: "forget-password", element: <PublicRoute> <ForgotPassword /> </PublicRoute> },
+          { path: "reset-password", element: <PublicRoute> <ResetPassword /> </PublicRoute> },
         ],
       },
        // ----- Private -----
@@ -71,16 +73,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <RouterProvider router={router} />
   </Provider>
 );
-
-// Remove loader once React is ready
-window.addEventListener("load", () => {
-  const loader = document.getElementById("global-loader");
-  if (loader) {
-    setTimeout(() => {
-      loader.classList.add("fade-out"); // trigger fade animation
-      setTimeout(() => {
-        loader.style.display = "none"; // fully remove after fade
-      }, 600); // match fade duration
-    }, 3000); // ✅ keep loader visible for 3s
-  }
-});
