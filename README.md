@@ -1,4 +1,8 @@
-# 📚 LearnMate
+<p align="center">
+  <img src="./assets/logo.png" alt="learn-mate" width="500">
+</p>
+
+<h1 align="center">LearnMate</h1>
 
 [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7.1.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
