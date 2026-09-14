@@ -27,16 +27,9 @@ const SignupStep1 = ({ nextStep }) => {
     }
 
   try {
-      const email = getValues("Email");
       const username = getValues("Name");
 
-      const exists = await authService.checkEmailOrUsernameExists(email , username);
-      if (exists.email) {
-        setToastMessage("Email already exists. Please use another email.");
-        setShowToast(true);
-        return;
-      }
-
+      const exists = await authService.checkUsernameExists(username);
       if (exists.username) {
       setToastMessage("Username already exists. Please choose another username.");
       setShowToast(true);
@@ -78,10 +71,14 @@ const SignupStep1 = ({ nextStep }) => {
             placeholder="Username"
             {...register("Name", {
               required: "Username is required",
-              pattern: {
-                value: /^(?!.*__)[a-zA-Z][a-zA-Z0-9_]{7,19}$/, // total 8–20
-                message:
-                  "Username must start with a letter and can contain letters, numbers, and underscores (8–20 characters).",
+              setValueAs: (value) => value.trim(),
+              minLength: {
+                value: 3,
+                message: "Username must be at least 3 characters",
+              },
+              maxLength: {
+                value: 30,
+                message: "Username must be 30 characters or fewer",
               },
             })}
           />

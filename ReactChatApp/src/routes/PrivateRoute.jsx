@@ -1,26 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import authService from "../appwrite/auth"; // your Appwrite service
+import { useSelector } from "react-redux";
 
 const PrivateRoute = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await authService.getCurrentUser();
-        setIsAuthenticated(!!user);
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
+  const { userData, loading } = useSelector((state) => state.auth);
 
   if (loading) {
     return (
@@ -30,7 +13,7 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!userData) {
     return <Navigate to="auth/login" replace />;
   }
 

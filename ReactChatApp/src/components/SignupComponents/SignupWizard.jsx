@@ -47,8 +47,10 @@ const SignupWizard = () => {
 
     try {
       const user = await dispatch(signupUser(finalData)).unwrap();
-      await authService.updateProfile(user.$id, { Status: "online" });
       if (user) {
+        authService.updateProfile(user.$id, { Status: "online" }).catch((error) => {
+          console.error("Failed to update signup status:", error);
+        });
         setToast({ show: true, message: "Account created successfully!", type: "success" });
         setTimeout(() => navigate("/dashboard"), 1000);
       }

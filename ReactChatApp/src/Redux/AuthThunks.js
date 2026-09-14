@@ -42,7 +42,12 @@ export const checkSession = createAsyncThunk(
   "auth/checkSession",
   async (_, { dispatch }) => {
     try {
-      const user = await authService.getCurrentUser();
+      const user = await Promise.race([
+        authService.getCurrentUser(),
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Session check timed out")), 10000);
+        }),
+      ]);
       if (user) {
         dispatch(login(user));
       } else {

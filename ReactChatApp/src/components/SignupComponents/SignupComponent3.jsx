@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useFormContext , Controller } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import TimezoneSelect from "react-timezone-select";
-import InputField from "../Shared/InputField";
 import Toast from "../Shared/Toast";
 
 const SignupStep3 = ({ nextStep, prevStep }) => {
-  const { register, watch, control, trigger, formState: { errors } } = useFormContext();
+  const { control, trigger, formState: { errors } } = useFormContext();
   const [toast, setToast] = useState({ show: false, message: "", type: "error" });
 
   const handleNext = async () => {
@@ -38,11 +37,24 @@ const SignupStep3 = ({ nextStep, prevStep }) => {
 
         <div className="flex flex-col gap-5">
           {/* Availability */}
-          <InputField
-            type="text"
-            placeholder="Availability (e.g. Weekends, Evenings)"
-            {...register("Availability", { required: "Availability is required" })}
-          />
+          <div className="text-white text-sm">
+            <label htmlFor="availability" className="block mb-2">
+              When are you usually available?
+            </label>
+            <select
+              id="availability"
+              className="w-full px-3 py-2 rounded-lg bg-gray-900 text-white focus:outline-none"
+              {...control.register("Availability", { required: "Availability is required" })}
+            >
+              <option value="">Select availability</option>
+              <option value="Flexible">Flexible</option>
+              <option value="Weekday mornings">Weekday mornings</option>
+              <option value="Weekday afternoons">Weekday afternoons</option>
+              <option value="Weekday evenings">Weekday evenings</option>
+              <option value="Weekends">Weekends</option>
+              <option value="Weekends evenings">Weekends evenings</option>
+            </select>
+          </div>
 
           {/* Timezone dropdown */}
           <div className="text-white text-sm">
