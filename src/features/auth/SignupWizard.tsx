@@ -52,7 +52,8 @@ const SignupWizard = () => {
           console.error("Failed to update signup status:", error);
         });
         setToast({ show: true, message: "Account created successfully!", type: "success" });
-        setTimeout(() => navigate("/dashboard"), 1000);
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error.code === 409) {
@@ -60,8 +61,7 @@ const SignupWizard = () => {
       } else {
         setToast({ show: true, message: error.message || "Signup failed", type: "error" });
       }
-    } finally {
-      setLoading(false); // always stop loading
+      setLoading(false);
     }
   };
 
@@ -80,7 +80,7 @@ const SignupWizard = () => {
   ) : (
     // last step has the submit form
     <form onSubmit={methods.handleSubmit(onSubmit)}>
-      <SignupStep5 prevStep={prevStep} handleSubmit={methods.handleSubmit(onSubmit)} />
+      <SignupStep5 prevStep={prevStep} />
       <Loader show={loading} />
     </form>
   )}

@@ -1,39 +1,52 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import Avatar, { genConfig } from "react-nice-avatar";
 import { motion } from "motion/react";
 
 const SignupStep4b = ({ nextStep, prevStep, gender }) => {
-  const { setValue } = useFormContext();
+  const { setValue, watch } = useFormContext();
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [selectedConfig, setSelectedConfig] = useState(null);
+  const savedAvatar = watch("Avatar");
+
+  const createAvatar = (seed, sex) => ({ ...genConfig(seed), sex });
 
   // ✅ generate avatars only once
     const maleAvatars = useMemo(
     () => [
-        genConfig({ sex: "man", hairStyle: "normal", glassesStyle: "round", shirtStyle: "hoody", eyeStyle: "smile" }),
-        genConfig({ sex: "man", hairStyle: "normal", glassesStyle: "none", shirtStyle: "polo", eyeStyle: "oval" }),
-        genConfig({ sex: "man", hairStyle: "mohawk", glassesStyle: "square", shirtStyle: "short", eyeStyle: "circle" }),
-        genConfig({ sex: "man", hairStyle: "thick", glassesStyle: "round", shirtStyle: "hoody", eyeStyle: "smile" }),
-        genConfig({ sex: "man", hairStyle: "normal", glassesStyle: "none", shirtStyle: "polo", eyeStyle: "oval" }),
-        genConfig({ sex: "man", hairStyle: "normal", glassesStyle: "square", shirtStyle: "short", eyeStyle: "circle" }),
+        createAvatar("male-avatar-1", "man"),
+        createAvatar("male-avatar-2", "man"),
+        createAvatar("male-avatar-3", "man"),
+        createAvatar("male-avatar-4", "man"),
+        createAvatar("male-avatar-5", "man"),
+        createAvatar("male-avatar-6", "man"),
     ],
     []
     );
 
   const femaleAvatars = useMemo(
     () => [
-        genConfig({ sex: "woman", hairStyle: "womanLong", hatStyle: "none", glassesStyle: "none" }),
-        genConfig({ sex: "woman", hairStyle: "womanLong", hatStyle: "none", glassesStyle: "none" }),
-        genConfig({ sex: "woman", hairStyle: "womanLong", hatStyle: "none", glassesStyle: "none" }),
-        genConfig({ sex: "woman", hairStyle: "womanShort", hatStyle: "none", glassesStyle: "none" }),
-        genConfig({ sex: "woman", hairStyle: "womanShort", hatStyle: "none", glassesStyle: "none" }),
-        genConfig({ sex: "woman", hairStyle: "womanShort", hatStyle: "none", glassesStyle: "none" }),
+        createAvatar("female-avatar-1", "woman"),
+        createAvatar("female-avatar-2", "woman"),
+        createAvatar("female-avatar-3", "woman"),
+        createAvatar("female-avatar-4", "woman"),
+        createAvatar("female-avatar-5", "woman"),
+        createAvatar("female-avatar-6", "woman"),
     ],
     []
 );
 
   const avatars = gender === "male" ? maleAvatars : femaleAvatars;
+
+  useEffect(() => {
+    if (!savedAvatar) return;
+    const savedConfig = typeof savedAvatar === "string" ? JSON.parse(savedAvatar) : savedAvatar;
+    const index = avatars.findIndex((config) => JSON.stringify(config) === JSON.stringify(savedConfig));
+    if (index >= 0) {
+      setSelectedIndex(index);
+      setSelectedConfig(avatars[index]);
+    }
+  }, [avatars, savedAvatar]);
 
   const handlePredefinedSelect = (config, index) => {
     setSelectedIndex(index);

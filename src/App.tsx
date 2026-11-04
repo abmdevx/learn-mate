@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "./Redux/Hooks";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import PublicNavbar from "@/layout/navigation/PublicNavbar";
 import AuthenticatedNavbar from "@/layout/navigation/AuthenticatedNavbar";
 import Footer from "@/layout/footer/Footer";
@@ -11,6 +11,7 @@ const MIN_INITIAL_LOADER_TIME = 1500;
 
 function App() {
   const dispatch = useAppDispatch();
+  const location = useLocation();
 
   useEffect(() => {
     const loaderStartedAt = Date.now();
@@ -42,7 +43,7 @@ function App() {
       {isLoggedIn ? <AuthenticatedNavbar /> : <PublicNavbar />}
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main key={location.pathname} className="page-transition flex-1">
         <Outlet />
       </main>
 

@@ -19,6 +19,40 @@ html {
   scroll-behavior: smooth;
 }
 
+.page-transition {
+  animation: page-fade-in 450ms ease both;
+}
+
+.mobile-drawer {
+  isolation: isolate;
+  border-right: 1px solid oklch(1 0 0 / 12%);
+  background:
+    radial-gradient(circle at 0% 0%, oklch(0.74 0.16 55 / 0.14), transparent 16rem),
+    radial-gradient(circle at 100% 35%, oklch(0.35 0.1 265 / 0.2), transparent 18rem),
+    oklch(0.12 0.025 264 / 0.98);
+  backdrop-filter: blur(24px);
+}
+
+.mobile-drawer::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, oklch(1 0 0 / 3%), transparent 35%);
+  content: "";
+  pointer-events: none;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 #global-loader,
 #initial-loader {
   position: fixed;

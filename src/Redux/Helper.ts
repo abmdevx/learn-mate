@@ -10,5 +10,8 @@ export const normalizeUserData = (data: Partial<SignupData> & { [key: string]: u
   timezone: String(data.Timezone || data.timezone || "UTC"),
   topics: (data.Topics || data.topics || []) as string[],
   bio: String(data.Bio || data.bio || ""),
-  avatar: String(data.Avatar || data.avatar || ""),
+  avatar: (() => {
+    const avatar = data.Avatar ?? data.avatar ?? "";
+    return typeof avatar === "string" ? avatar : JSON.stringify(avatar);
+  })(),
 });

@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useFormContext } from "react-hook-form";
 
-const SignupStep5 = ({ prevStep, handleSubmit }) => {
+const SignupStep5 = ({ prevStep }) => {
   const { register, watch } = useFormContext();
   const Bio = watch("Bio");
 
@@ -34,7 +34,6 @@ const SignupStep5 = ({ prevStep, handleSubmit }) => {
               type="submit"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              onClick={handleSubmit} // parent handles final submit
               className="py-2 px-4 bg-green-500 text-gray-900 rounded-lg font-semibold shadow-md"
             >
               Finish

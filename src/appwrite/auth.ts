@@ -56,7 +56,7 @@ export class AuthService {
               Timezone: timezone || "UTC",
               Topics: Array.isArray(topics) ? topics : [],
               Bio: bio || "",
-              Avatar: avatar ? JSON.stringify(avatar) : "",
+              Avatar: avatar || "",
               Status: "offline",
             },
           });
