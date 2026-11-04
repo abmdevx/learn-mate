@@ -10,18 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@multiavatar/multiavatar": "^1.0.7",
     "@reduxjs/toolkit": "^2.9.0",
     "@tailwindcss/vite": "^4.1.13",
     "appwrite": "^20.0.0",
-    "avataaars2": "^1.1.1",
-    "gsap": "^3.13.0",
     "lucide-react": "^0.544.0",
     "motion": "^12.23.12",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
-    "react-icons": "^5.5.0",
     "react-nice-avatar": "^1.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.1",
@@ -30,19 +26,22 @@
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^10.0.1",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
     "baseline-browser-mapping": "^2.10.0",
-    "eslint": "^9.33.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^16.3.0",
     "vite": "^7.1.2"
   },
   "allowScripts": {
     "@tailwindcss/oxide@4.1.13": true,
     "esbuild@0.28.2": true
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
   }
 }
