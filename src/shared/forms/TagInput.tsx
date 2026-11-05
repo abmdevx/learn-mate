@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { KeyboardEvent } from "react";
+import { normalizeTopics } from "@/shared/normalizeTopics";
 
 interface TagsInputProps {
   value?: string[];
@@ -13,19 +14,23 @@ const TagsInput = ({ value = [], onChange, placeholder }: TagsInputProps) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === "Enter" || e.key === " ") && input.trim()) {
       e.preventDefault();
-      if (!value.includes(input.trim())) {
-        onChange([...value, input.trim()]);
+      const topic = input.trim().toLowerCase();
+      const normalizedValue = normalizeTopics(value);
+      if (!normalizedValue.includes(topic)) {
+        onChange([...normalizedValue, topic]);
+      } else {
+        onChange(normalizedValue);
       }
       setInput("");
     }
 
     if (e.key === "Backspace" && !input && value.length > 0) {
-      onChange(value.slice(0, -1));
+      onChange(normalizeTopics(value).slice(0, -1));
     }
   };
 
   const removeTag = (tag: string) => {
-    onChange(value.filter((t) => t !== tag));
+    onChange(normalizeTopics(value).filter((t) => t !== tag));
   };
 
   return (

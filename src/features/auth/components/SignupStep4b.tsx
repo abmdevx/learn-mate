@@ -1,42 +1,66 @@
 import { useState, useMemo, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import Avatar, { genConfig } from "react-nice-avatar";
+import type { HairStyle } from "react-nice-avatar";
 import { motion } from "motion/react";
+import { RefreshCw } from "lucide-react";
 
 const SignupStep4b = ({ nextStep, prevStep, gender }) => {
   const { setValue, watch } = useFormContext();
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [selectedConfig, setSelectedConfig] = useState(null);
+  const [avatarSetVersion, setAvatarSetVersion] = useState(0);
   const savedAvatar = watch("Avatar");
 
-  const createAvatar = (seed, sex) => ({ ...genConfig(seed), sex });
+  const createAvatar = (sex, index) => {
+    const isFemale = sex === "woman";
+    const maleHairStyles: HairStyle[] = ["normal", "thick", "mohawk"];
+    const config = genConfig({
+      sex,
+      hairStyle: isFemale
+        ? "womanLong"
+        : maleHairStyles[index % maleHairStyles.length],
+      ...(isFemale ? { eyeBrowStyle: "upWoman" } : {}),
+    });
+
+    return {
+      ...config,
+      sex,
+      hairStyle: isFemale ? "womanLong" : config.hairStyle,
+      ...(isFemale ? { eyeBrowStyle: "upWoman" } : {}),
+    };
+  };
 
   // ✅ generate avatars only once
     const maleAvatars = useMemo(
     () => [
-        createAvatar("male-avatar-1", "man"),
-        createAvatar("male-avatar-2", "man"),
-        createAvatar("male-avatar-3", "man"),
-        createAvatar("male-avatar-4", "man"),
-        createAvatar("male-avatar-5", "man"),
-        createAvatar("male-avatar-6", "man"),
+        createAvatar("man", 0),
+        createAvatar("man", 1),
+        createAvatar("man", 2),
+        createAvatar("man", 3),
+        createAvatar("man", 4),
+        createAvatar("man", 5),
     ],
-    []
+    [avatarSetVersion]
     );
 
   const femaleAvatars = useMemo(
     () => [
-        createAvatar("female-avatar-1", "woman"),
-        createAvatar("female-avatar-2", "woman"),
-        createAvatar("female-avatar-3", "woman"),
-        createAvatar("female-avatar-4", "woman"),
-        createAvatar("female-avatar-5", "woman"),
-        createAvatar("female-avatar-6", "woman"),
+        createAvatar("woman", 0),
+        createAvatar("woman", 1),
+        createAvatar("woman", 2),
+        createAvatar("woman", 3),
+        createAvatar("woman", 4),
+        createAvatar("woman", 5),
     ],
-    []
+  [avatarSetVersion]
 );
 
-  const avatars = gender === "male" ? maleAvatars : femaleAvatars;
+  const avatars = gender === "male"
+    ? maleAvatars
+    : gender === "female"
+      ? femaleAvatars
+      : [];
 
   useEffect(() => {
     if (!savedAvatar) return;
@@ -54,6 +78,13 @@ const SignupStep4b = ({ nextStep, prevStep, gender }) => {
     setValue("Avatar", config);
   };
 
+  const refreshAvatars = () => {
+    setSelectedIndex(null);
+    setSelectedConfig(null);
+    setValue("Avatar", "");
+    setAvatarSetVersion((version) => version + 1);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
       <motion.div 
@@ -61,9 +92,20 @@ const SignupStep4b = ({ nextStep, prevStep, gender }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       className="w-full max-w-md bg-gray-800/90 shadow-xl rounded-xl p-6 border border-orange-500">
-        <h2 className="text-lg font-bold text-orange-500 text-center mb-4">
-          Choose Your Avatar
-        </h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="flex-1 text-center text-lg font-bold text-orange-500">
+            Choose Your Avatar
+          </h2>
+          <button
+            type="button"
+            onClick={refreshAvatars}
+            className="rounded-lg p-2 text-orange-500 transition-colors hover:bg-orange-500/10 hover:text-orange-400"
+            aria-label="Refresh avatars"
+            title="Refresh avatars"
+          >
+            <RefreshCw className="h-5 w-5" />
+          </button>
+        </div>
 
         {/* Avatar grid */}
         <div className="grid grid-cols-3 gap-4 justify-items-center">

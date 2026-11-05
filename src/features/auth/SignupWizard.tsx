@@ -9,7 +9,6 @@ import SignupStep5 from "./components/SignupStep5";
 import { useForm, FormProvider } from "react-hook-form";
 import { signupUser } from "@/Redux/AuthThunks";
 import { useNavigate } from "react-router-dom";
-import Loader from "@/Loader";
 import Toast from "@/shared/feedback/AppToast";
 import authService from "@/appwrite/auth";
 
@@ -17,6 +16,7 @@ const SignupWizard = () => {
   const [step, setStep] = useState(1);
   const [gender, setGender] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "error" });
 
   const dispatch = useAppDispatch();
@@ -52,8 +52,8 @@ const SignupWizard = () => {
           console.error("Failed to update signup status:", error);
         });
         setToast({ show: true, message: "Account created successfully!", type: "success" });
-        await new Promise((resolve) => setTimeout(resolve, 700));
-        navigate("/dashboard");
+        setIsRedirecting(true);
+        window.setTimeout(() => navigate("/dashboard"), 280);
       }
     } catch (error) {
       if (error.code === 409) {
@@ -79,9 +79,11 @@ const SignupWizard = () => {
     </>
   ) : (
     // last step has the submit form
-    <form onSubmit={methods.handleSubmit(onSubmit)}>
+    <form
+      onSubmit={methods.handleSubmit(onSubmit)}
+      className={isRedirecting ? "signup-fade-out" : ""}
+    >
       <SignupStep5 prevStep={prevStep} />
-      <Loader show={loading} />
     </form>
   )}
 

@@ -72,9 +72,13 @@
 // export default SignupStep4;
 
 import { motion } from "motion/react";
+import { useFormContext } from "react-hook-form";
 
 const SignupComponent4a = ({ nextStep, prevStep, setGender }) => {
+  const { setValue } = useFormContext();
+
   const handleSelect = (gender) => {
+    setValue("Avatar", "");
     setGender(gender);
     nextStep();
   };

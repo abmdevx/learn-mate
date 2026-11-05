@@ -1,6 +1,7 @@
 import conf from "../config/ConfigID";
 import { Client, Account, ID, TablesDB, Query } from "appwrite";
 import type { AppwriteUser, NormalizedSignupData, ProfileUpdates, UserProfile } from "../types";
+import { normalizeTopics } from "@/shared/normalizeTopics";
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : "Unknown Appwrite error";
@@ -54,7 +55,7 @@ export class AuthService {
               Level: level || "Beginner",
               Availability: availability || "Available",
               Timezone: timezone || "UTC",
-              Topics: Array.isArray(topics) ? topics : [],
+              Topics: normalizeTopics(topics),
               Bio: bio || "",
               Avatar: avatar || "",
               Status: "offline",
@@ -121,8 +122,11 @@ export class AuthService {
 
   async updateProfile(profileId: string, updates: ProfileUpdates) {
     try {
+      const normalizedUpdates = updates.Topics
+        ? { ...updates, Topics: normalizeTopics(updates.Topics) }
+        : updates;
       const response = await this.tables.updateRow(
-        { databaseId: conf.appwriteDatabaseId, tableId: conf.appwriteUsersCollectionId, rowId: profileId, data: updates}
+        { databaseId: conf.appwriteDatabaseId, tableId: conf.appwriteUsersCollectionId, rowId: profileId, data: normalizedUpdates}
       );
       return response;
     } catch (error) {

@@ -1,5 +1,6 @@
 // helper.js
 import type { NormalizedSignupData, SignupData } from "../types";
+import { normalizeTopics } from "@/shared/normalizeTopics";
 
 export const normalizeUserData = (data: Partial<SignupData> & { [key: string]: unknown }): NormalizedSignupData => ({
   name: String(data.Name || data.name || ""),
@@ -8,7 +9,7 @@ export const normalizeUserData = (data: Partial<SignupData> & { [key: string]: u
   level: String(data.Level || data.level || "Beginner"),
   availability: String(data.Availability || data.availability || "Available"),
   timezone: String(data.Timezone || data.timezone || "UTC"),
-  topics: (data.Topics || data.topics || []) as string[],
+  topics: normalizeTopics(data.Topics || data.topics),
   bio: String(data.Bio || data.bio || ""),
   avatar: (() => {
     const avatar = data.Avatar ?? data.avatar ?? "";

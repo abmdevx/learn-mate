@@ -19,6 +19,7 @@ const LoginForm = () => {
   const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<LoginForm>();
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "error" });
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
@@ -33,7 +34,8 @@ const LoginForm = () => {
       const user = await dispatch(loginUser(data)).unwrap();
       await authService.updateProfile(user.$id, { Status: "online" });
       setFailedAttempts(0);
-      setTimeout(() => { setLoading(false); navigate("/dashboard"); }, 700);
+      setIsRedirecting(true);
+      window.setTimeout(() => navigate("/dashboard"), 280);
     } catch (error) {
       setLoading(false);
       const nextAttempts = failedAttempts + 1;
@@ -65,7 +67,7 @@ const LoginForm = () => {
   }, [isBlocked]);
 
   return <main className="app-shell flex min-h-screen items-center justify-center px-4 py-28">
-    <Card className="app-surface w-full max-w-md">
+    <Card className={`app-surface w-full max-w-md ${isRedirecting ? "auth-fade-out" : ""}`}>
       <CardHeader className="space-y-5 p-7 pb-4">
         <BrandLogo className="h-auto w-44 max-w-[11rem]" />
         <div><p className="eyebrow">Welcome back</p><h1 className="mt-2 text-3xl font-semibold tracking-tight">Continue your learning journey.</h1><p className="mt-2 text-sm text-muted-foreground">Sign in to pick up where you left off.</p></div>
@@ -74,7 +76,7 @@ const LoginForm = () => {
         <form className="space-y-5" onSubmit={handleSubmit(handleLogin)}>
           <div className="space-y-2"><Label htmlFor="email">Email address</Label><div className="relative"><Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input id="email" type="email" placeholder="you@example.com" className="h-11 rounded-xl pl-10" {...register("email", { required: true })} /></div></div>
           <div className="space-y-2"><div className="flex items-center justify-between"><Label htmlFor="password">Password</Label><Link className="text-xs text-primary hover:underline" to="/auth/forget-password">Forgot password?</Link></div><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input id="password" type="password" placeholder="Enter your password" className="h-11 rounded-xl pl-10" {...register("password", { required: true })} /></div></div>
-          <Button className="h-11 w-full rounded-xl" type="submit" disabled={loading || isBlocked}>{loading ? "Signing you in…" : isBlocked ? `Try again in ${timer}s` : <>Sign in <ArrowRight className="ml-2 size-4" /></>}</Button>
+          <Button className="h-11 w-full rounded-xl" type="submit" disabled={loading || isBlocked || isRedirecting}>{loading ? "Signing you in…" : isBlocked ? `Try again in ${timer}s` : isRedirecting ? "Welcome back…" : <>Sign in <ArrowRight className="ml-2 size-4" /></>}</Button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">New to LearnMate? <Link className="font-medium text-primary hover:underline" to="/auth/signup">Create an account</Link></p>
       </CardContent>

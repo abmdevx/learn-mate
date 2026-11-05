@@ -8,6 +8,7 @@ import authService from "@/appwrite/auth";
 import InputField from "@/shared/forms/FormInput";
 import TagsInput from "@/shared/forms/TagInput";
 import Toast from "@/shared/feedback/AppToast"
+import { normalizeTopics } from "@/shared/normalizeTopics";
 
 function Profile() {
   const { userData } = useAppSelector((state) => state.auth);
@@ -48,10 +49,14 @@ function Profile() {
   // Submit handler
   const onSubmit = async (data) => {
     try {
-      await authService.updateProfile(profile.$id, data);
+      const normalizedData = {
+        ...data,
+        ...(data.Topics ? { Topics: normalizeTopics(data.Topics) } : {}),
+      };
+      await authService.updateProfile(profile.$id, normalizedData);
       setToast({ show: true, message: "Profile updated successfully!", type: "success" });
-      setProfile({ ...profile, ...data });
-      reset(data);
+      setProfile({ ...profile, ...normalizedData });
+      reset(normalizedData);
       setEditPersonal(false);
       setEditBio(false);
       setEditTopics(false);
