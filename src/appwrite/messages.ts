@@ -1,0 +1,133 @@
+// messages.js
+import conf from "../config/ConfigID";
+import { Client, ID, TablesDB, Query } from "appwrite";
+import type { Message } from "../types";
+
+type MessagePage = {
+  rows: Message[];
+  total: number;
+};
+
+class MessageService {
+  client = new Client();
+  tables: TablesDB;
+
+  constructor() {
+    this.client
+      .setEndpoint(conf.appwriteUrl)
+      .setProject(conf.appwriteProjectId);
+
+    this.tables = new TablesDB(this.client);
+  }
+
+  resetClient() {
+    this.client = new Client()
+      .setEndpoint(conf.appwriteUrl)
+      .setProject(conf.appwriteProjectId);
+
+    this.tables = new TablesDB(this.client);
+    console.log("🔄 Appwrite client has been reset.");
+  }
+
+  // ✅ Send a new message
+  async sendMessage({ matchId, senderId, message }: { matchId: string; senderId: string; message: string }) {
+    try {
+      const newMessage = await this.tables.createRow({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwritemessagesCollectionId, // your messages tableId
+        rowId: ID.unique(),
+        data: {
+          MatchId: matchId,
+          SenderId: senderId,
+          Message: message,
+        },
+      });
+      return newMessage;
+    } catch (error) {
+      if (error.message.includes("Rate limit")) this.resetClient();
+      console.error("❌ Error sending message:", error);
+      throw error;
+    }
+  }
+
+  // ✅ Get messages of a match (conversation)
+  async getMessagesPage(
+    matchId: string,
+    { limit = 50, offset = 0 }: { limit?: number; offset?: number } = {},
+  ): Promise<MessagePage> {
+    try {
+      const response = await this.tables.listRows<Message>({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwritemessagesCollectionId,
+        queries: [
+          Query.equal("MatchId", matchId),
+          Query.orderDesc("$createdAt"),
+          Query.limit(limit),
+          Query.offset(offset),
+        ],
+      });
+      return { rows: response.rows.reverse(), total: response.total };
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Rate limit")) this.resetClient();
+      console.error("❌ Error fetching messages:", error);
+      throw error;
+    }
+  }
+
+  async getMessages(matchId: string): Promise<Message[]> {
+    const response = await this.getMessagesPage(matchId, { limit: 100 });
+    return response.rows;
+  }
+
+  // ✅ Get all messages sent by a user (optional)
+  async getMessagesByUser(userId: string): Promise<Message[]> {
+    try {
+      const response = await this.tables.listRows<Message>({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwritemessagesCollectionId,
+        queries: [Query.equal("SenderId", userId)],
+      });
+      return response.rows;
+    } catch (error) {
+      if (error.message.includes("Rate limit")) this.resetClient();
+      console.error("❌ Error fetching messages by user:", error);
+      throw error;
+    }
+  }
+
+  // ✅ Optional: Delete a message
+  async deleteMessage(messageId: string) {
+    try {
+      return await this.tables.deleteRow({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwritemessagesCollectionId,
+        rowId: messageId,
+      });
+    } catch (error) {
+      if (error.message.includes("Rate limit")) this.resetClient();
+      console.error("❌ Error deleting message:", error);
+      throw error;
+    }
+  }
+
+  subscribeToMessages(matchId: string, callback: (message: Message) => void) {
+    const channel = `databases.${conf.appwriteDatabaseId}.tables.${conf.appwritemessagesCollectionId}.rows`;
+
+    const unsubscribe = this.client.subscribe(channel, (response) => {
+      // only listen to new message creation
+      if (!response.events.some(e => e.includes(".create"))) return;
+
+      const newMessage = response.payload as Message;
+
+      // important → correct field name
+      if (newMessage.MatchId !== matchId) return;
+
+      callback(newMessage);
+    });
+
+    return unsubscribe;
+  }
+}
+
+const messageService = new MessageService();
+export default messageService;
