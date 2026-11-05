@@ -1,102 +1,192 @@
-<p align="center">
-  <img src="./assets/logo.png" alt="learn-mate" width="500">
+ <p align="center">
+  <img src="./assets/logo.png" alt="LearnMate Logo" width="220">
 </p>
 
 <h1 align="center">LearnMate</h1>
 
-[![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-7.1.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-[![Appwrite](https://img.shields.io/badge/Appwrite-20.0.0-F02E65?logo=appwrite&logoColor=white)](https://appwrite.io/)
-[![Redux Toolkit](https://img.shields.io/badge/Redux%20Toolkit-2.9.0-764ABC?logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.1.13-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+<p align="center">
+  <strong>Learn Together. Grow Together.</strong>
+  <br />
+  Find compatible study partners, build meaningful connections, and make learning a collaborative experience.
+</p>
 
-> A collaborative learning platform that helps students find the right people to learn with.
+<p align="center">
+  <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  <a href="https://vite.dev/"><img src="https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white" alt="Vite" /></a>
+  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" /></a>
+  <a href="https://appwrite.io/"><img src="https://img.shields.io/badge/Appwrite-Backend-F02E65?logo=appwrite&logoColor=white" alt="Appwrite" /></a>
+  <img src="https://img.shields.io/badge/Status-Active_Development-22C55E" alt="Project Status" />
+</p>
+
+---
 
 ## 🎓 About LearnMate
 
-LearnMate connects students with compatible study partners based on shared interests, learning goals, skill level, availability, and timezone.
+**LearnMate** is a collaborative learning platform designed to help students discover compatible study partners based on their learning interests, goals, skill levels, availability, and timezones.
 
-The platform brings profile discovery, partner matching, and direct communication into one focused experience. Instead of learning alone, users can build meaningful study connections and collaborate with people who have similar goals.
+Learning doesn't have to be a solo journey. LearnMate makes it easier to connect with like-minded students, share knowledge, exchange ideas, and build productive learning relationships.
 
-## ✨ Main Features
+Whether you're exploring programming, developing technical skills, or working toward academic goals, LearnMate helps you find the right people to learn with.
 
-### Authentication and Onboarding
+## ✨ Features
 
-- Create an account with email and password.
-- Sign in securely and maintain an active session.
-- Complete a guided profile setup during registration.
-- Access protected areas of the application after authentication.
+### 🔐 Authentication & Onboarding
+- Secure email and password registration.
+- User login and session management.
+- Guided multi-step registration experience.
+- Personalized profile setup during onboarding.
+- Protected routes for authenticated users.
+- Forgot password and password recovery functionality.
 
-### Personalized Learning Profiles
+### 👤 Personalized Learning Profiles
+- Create and customize personal learning profiles.
+- Add learning interests and preferred topics.
+- Select your current skill level.
+- Set preferred learning availability.
+- Configure your timezone.
+- Add a personal biography.
+- Generate and customize profile avatars.
+- Update personal information and learning preferences.
 
-Users can create and manage a profile containing:
+### 🤝 Smart Study Partner Discovery
+- Discover students with similar learning interests.
+- Personalized study partner recommendations.
+- Compatibility-based matching.
+- Explore student profiles and learning preferences.
+- Identify shared learning topics.
+- Like potential study partners.
+- Discover new students through the matching interface.
 
-- Learning topics and interests
-- Current learning level
-- Preferred availability
-- Timezone
-- Personal bio
-- Custom avatar
+### 💚 Mutual Matching System
+- Connect with students who share your interest.
+- Mutual-like functionality.
+- Automatic match creation when two students like each other.
+- View your established learning connections.
+- Explore matched student profiles.
+- Access conversations with your learning partners.
 
-### Study Partner Matching
+### 💬 Real-Time Messaging
+- Private conversations between matched students.
+- Real-time message updates.
+- Conversation history.
+- Paginated message loading.
+- Search conversations by user name.
+- Message timestamps.
+- Dedicated chat interface.
+- Direct access to individual conversations.
 
-LearnMate helps users discover potential study partners using shared learning interests and compatible preferences. Users can review profiles, express interest, and connect through the matching experience.
+### 🔔 Notifications
+- Notifications for incoming likes.
+- Notifications when a mutual match is established.
+- New message notifications.
+- Real-time notification updates.
+- Unread notification indicators.
+- Notification history.
+- Mark notifications as read.
 
-### Direct Messaging
+### 📊 Personalized Dashboard
+- Personalized welcome experience.
+- Overview of your learning profile.
+- Display of learning level and availability.
+- Overview of connected learning partners.
+- Quick access to study partner discovery.
+- Easy navigation to your existing connections.
 
-Matched users can communicate through private conversations. The messaging experience keeps study discussions connected to the people and learning goals that matter to each user.
+### ⚙️ Profile & Account Management
+- Dedicated profile management.
+- Edit personal information.
+- Update learning interests and preferences.
+- Manage profile details.
+- Dedicated account settings interface.
 
-### Profile Management
+### 🎨 Modern User Experience
+- Clean and intuitive interface.
+- Responsive desktop and mobile layouts.
+- Smooth animations and transitions.
+- Interactive UI components.
+- Custom profile avatars.
+- Loading states and skeleton screens.
+- Toast notifications and user feedback.
+- Consistent navigation experience.
 
-Users can update their learning goals and personal preferences whenever they change. Profile forms include validation, structured selections, and save or discard actions for unsaved changes.
+---
 
-### Responsive User Experience
+## 🚀 Coming Soon
 
-The interface is designed for both desktop and mobile screens, with clear navigation, helpful loading states, form feedback, and notifications throughout the application.
+### 💻 Coding Playground
 
-## 🛠️ Technology Stack
+LearnMate is expanding beyond study partner discovery and messaging to provide students with an interactive coding experience.
 
-### Frontend
+The upcoming **Coding Playground** will introduce:
 
-- **React** - Builds the component-based user interface.
-- **Vite** - Provides the development server and production build tooling.
-- **React Router** - Handles navigation and protected application routes.
-- **Redux Toolkit** - Manages shared authentication and application state.
-- **React Hook Form** - Handles form state, validation, and profile editing.
-- **Tailwind CSS** - Provides responsive utility-first styling.
+- Interactive in-browser code editor.
+- Syntax highlighting.
+- Support for multiple programming languages.
+- Integrated code execution.
+- Programming practice exercises.
+- Collaborative coding sessions with study partners.
 
-### Backend and Data Services
+<sub>Currently planned for a future release.</sub>
 
-- **Appwrite** - Provides authentication, database services, user profiles, matches, messages, and notifications.
-- **Appwrite Auth** - Manages email and password authentication and sessions.
-- **Appwrite Tables** - Stores application data for profiles, matches, messages, and notifications.
+---
 
-### UI, Animation, and Supporting Libraries
+## 🛠️ Tech Stack
 
-- **Motion** - Adds interface transitions and component animations.
-- **GSAP** - Supports advanced animation effects.
-- **Lucide React** - Provides interface icons.
-- **React Icons** - Provides additional icon options.
-- **Swiper** - Supports interactive sliders and carousels.
-- **React Timezone Select** - Provides timezone selection for user profiles.
-- **React Nice Avatar**, **Avataaars2**, and **Multiavatar** - Support profile avatar creation.
+| Technology | Purpose |
+|---|---|
+| React 19 | Frontend development |
+| TypeScript | Type safety |
+| Vite | Development and build tooling |
+| Tailwind CSS 4 | Styling |
+| Redux Toolkit | State management |
+| React Router | Application routing |
+| Appwrite | Backend and database |
+| Appwrite Authentication | User authentication |
+| Appwrite Realtime | Real-time updates |
+| React Hook Form | Form management |
+| Radix UI | Accessible UI components |
+| Motion | Animations |
+| Lucide React | Icons |
 
-## 🔄 How LearnMate Works
+---
 
-1. A student creates an account and completes their learning profile.
-2. LearnMate uses the profile information to present compatible study partners.
-3. The student reviews other profiles and expresses interest in suitable matches.
-4. Once a connection is established, matched users can start a private conversation.
-5. Users can continue updating their profile as their learning goals and availability change.
+## 🔄 How It Works
 
-## 🎯 Product Goals
+1. **Create Your Account** — Sign up and complete the guided onboarding process.
+2. **Build Your Profile** — Add your learning interests, skill level, availability, and timezone.
+3. **Discover Study Partners** — Explore students with compatible learning interests and preferences.
+4. **Make Connections** — Like students you'd like to learn with.
+5. **Get Matched** — Connect automatically when another student likes you back.
+6. **Start Learning Together** — Communicate through private real-time conversations.
+7. **Stay Connected** — Receive notifications and keep your learning profile updated.
 
-LearnMate is built around three simple goals:
+---
 
-- **Personalized learning** - Help users find partners who match their goals and interests.
-- **Consistent collaboration** - Make it easier to maintain productive study relationships.
-- **Accessible communication** - Keep discovery, matching, and messaging in one place.
+## 🎯 Our Vision
+
+Our vision is to make learning more social, engaging, and accessible.
+
+LearnMate aims to become a collaborative learning environment where students can discover study partners, exchange knowledge, communicate, practice programming, and grow together.
+
+We believe that learning becomes more meaningful when shared with the right people.
+
+**Find your people. Share your knowledge. Learn further.**
+
+---
 
 ## 📜 License
 
-This project is proprietary and confidential. The source code, design, concept, and content may not be copied, reused, distributed, or used for commercial or personal projects without prior written permission from the author.
+This project is licensed under the **MIT License**.
+
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, subject to the conditions of the MIT License.
+
+See the [LICENSE](./LICENSE) file for the full license text.
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ for collaborative learning.</strong>
+  <br />
+  <sub>LearnMate — Learn Together. Grow Together.</sub>
+</p>

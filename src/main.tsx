@@ -10,7 +10,6 @@ import SignupWizard from "@/features/auth/SignupWizard";
 import ResetPassword from "./pages/ResetPassword";
 import About from "./pages/About";
 import Features from "./pages/Features";
-import Copyright from "./pages/Copyright";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgetPassword";
 import PrivateRoute from "./routes/PrivateRoute";
@@ -42,7 +41,6 @@ const router = createBrowserRouter([
       { index: true, element: <PublicRoute><LandingPage /></PublicRoute> },
       { path: "/features", element: <PublicRoute><Features /></PublicRoute> },
       { path: "/about", element: <PublicRoute><About /></PublicRoute> },
-      { path: "/copyright", element: <PublicRoute><Copyright /></PublicRoute> },
 
       // ✅ Group auth-related routes
       {
