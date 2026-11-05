@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import {
   ArrowLeft,
   CheckCheck,
+  Menu,
   MoreHorizontal,
   Search,
   Send,
@@ -15,7 +16,9 @@ import ReactNiceAvatar from "react-nice-avatar";
 import matchService from "@/appwrite/matches";
 import authService from "@/appwrite/auth";
 import messageService from "@/appwrite/messages";
+import notificationService from "@/appwrite/notifications";
 import { useAppSelector } from "@/Redux/Hooks";
+import type { Message } from "@/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -39,13 +42,6 @@ type Profile = {
   Name?: string;
   Avatar?: string;
   Status?: string;
-};
-
-type Message = {
-  $id: string;
-  SenderId: string;
-  Message: string;
-  $createdAt?: string;
 };
 
 const avatarFor = (profile?: Profile | null) => {
@@ -77,12 +73,16 @@ function MessagingPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [mobileListOpen, setMobileListOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const matchIdRef = useRef<string | null>(null);
+  const loadedMessageCountRef = useRef(0);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") =>
     messagesEndRef.current?.scrollIntoView({ behavior });
@@ -118,10 +118,16 @@ function MessagingPage() {
     const setupChat = async () => {
       try {
         const match = await matchService.getMatchBetweenUsers(userData.$id, selectedUser.$id);
-        if (!match || cancelled) return;
-        const initialMessages = (await messageService.getMessages(match.$id)) as Message[];
+        if (!match || cancelled) {
+          setLoadingMessages(false);
+          return;
+        }
+        matchIdRef.current = match.$id;
+        const initialPage = await messageService.getMessagesPage(match.$id);
         if (cancelled) return;
-        setMessages(initialMessages);
+        setMessages(initialPage.rows);
+        loadedMessageCountRef.current = initialPage.rows.length;
+        setHasOlderMessages(initialPage.rows.length < initialPage.total);
         setLoadingMessages(false);
         requestAnimationFrame(() => scrollToBottom("auto"));
         unsubscribe = messageService.subscribeToMessages(match.$id, (incoming: Message) => {
@@ -140,9 +146,28 @@ function MessagingPage() {
     setupChat();
     return () => {
       cancelled = true;
+      matchIdRef.current = null;
+      loadedMessageCountRef.current = 0;
       unsubscribe?.();
     };
   }, [selectedUser?.$id, userData?.$id]);
+
+  const loadOlderMessages = async () => {
+    if (!matchIdRef.current || loadingOlderMessages || !hasOlderMessages) return;
+    setLoadingOlderMessages(true);
+    try {
+      const page = await messageService.getMessagesPage(matchIdRef.current, {
+        offset: loadedMessageCountRef.current,
+      });
+      setMessages((current) => [...page.rows, ...current]);
+      loadedMessageCountRef.current += page.rows.length;
+      setHasOlderMessages(loadedMessageCountRef.current < page.total);
+    } catch {
+      setError("Older messages couldn't be loaded.");
+    } finally {
+      setLoadingOlderMessages(false);
+    }
+  };
 
   const filteredProfiles = useMemo(
     () => profiles.filter((profile) => profile.Name?.toLowerCase().includes(search.toLowerCase())),
@@ -161,9 +186,11 @@ function MessagingPage() {
     setSending(true);
     setError("");
     try {
-      const match = await matchService.getMatchBetweenUsers(userData.$id, selectedUser.$id);
-      if (!match) throw new Error("Conversation unavailable");
-      await messageService.sendMessage({ matchId: match.$id, senderId: userData.$id, message: content });
+      if (!matchIdRef.current) throw new Error("Conversation unavailable");
+      await messageService.sendMessage({ matchId: matchIdRef.current, senderId: userData.$id, message: content });
+      await notificationService.sendMessageNotification(userData.$id, selectedUser.$id).catch((notificationError) => {
+        console.error("Message sent, but notification creation failed:", notificationError);
+      });
       setNewMessage("");
     } catch {
       setError("Your message couldn't be sent. Please try again.");
@@ -199,23 +226,24 @@ function MessagingPage() {
 
   return (
     <TooltipProvider>
-      <div className="mt-16 flex h-[calc(100vh-4rem)] min-h-[560px] bg-background">
+      <div className="mt-20 flex h-[calc(100vh-5rem)] min-h-[560px] bg-background">
         <aside className="hidden w-[min(100%,21rem)] shrink-0 flex-col border-r border-border/60 bg-card/30 md:flex">
-          <div className="flex items-center justify-between border-b border-border/60 p-5"><div><h1 className="text-xl font-semibold tracking-tight">Messages</h1><p className="mt-1 text-xs text-muted-foreground">{profiles.length} learning connections</p></div><Badge variant="outline" className="rounded-full">Chat</Badge></div>
+          <div className="flex min-h-[5.25rem] items-center justify-between border-b border-border/60 px-5 py-4"><div><h1 className="text-xl font-semibold tracking-tight">Messages</h1><p className="mt-1 text-xs text-muted-foreground">{profiles.length} learning connections</p></div><Badge variant="outline" className="rounded-full">Chat</Badge></div>
           {conversationList}
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
           {selectedUser ? <motion.div key={selectedUser.$id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-0 flex-1 flex-col">
-            <header className="flex items-center gap-3 border-b border-border/60 bg-card/20 px-4 py-3 sm:px-6">
-              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileListOpen(true)} aria-label="Open conversations"><Search /></Button>
-              <div className="relative size-10 shrink-0"><ProfileAvatar profile={selectedUser} size="size-10" />{selectedUser.Status === "online" && <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background bg-emerald-500" />}</div>
+            <header className="flex min-h-[5.25rem] items-center gap-3 border-b border-border/60 bg-card/20 px-4 py-4 sm:px-8">
+              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileListOpen(true)} aria-label="Open conversations"><Menu /></Button>
+              <div className="relative size-12 shrink-0"><ProfileAvatar profile={selectedUser} size="size-12" />{selectedUser.Status === "online" && <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background bg-emerald-500" />}</div>
               <div className="min-w-0 flex-1"><h2 className="truncate font-semibold">{selectedUser.Name || "Learner"}</h2><p className="text-xs text-muted-foreground">{selectedUser.Status === "online" ? "Online now" : "Available to learn together"}</p></div>
               <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Conversation actions"><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={() => navigate(`/user/${selectedUser.$id}`)}><UserRound className="mr-2 size-4" />View profile</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem onClick={() => setError("Conversation actions are not available yet.")}>Report conversation</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
             </header>
 
             <ScrollArea className="flex-1 px-4 sm:px-8">
               <div className="mx-auto flex min-h-full max-w-3xl flex-col justify-end gap-3 py-6">
+                {!loadingMessages && hasOlderMessages && <Button variant="outline" size="sm" className="mx-auto" onClick={loadOlderMessages} disabled={loadingOlderMessages}>{loadingOlderMessages ? "Loading older messages..." : "Load older messages"}</Button>}
                 {loadingMessages ? <div className="space-y-3">{[1, 2, 3, 4].map((item) => <Skeleton key={item} className={`h-12 rounded-2xl ${item % 2 ? "ml-auto w-2/3" : "w-1/2"}`} />)}</div> : messages.length ? messages.map((message) => {
                   const mine = message.SenderId === userData?.$id;
                   return <div key={message.$id} className={`flex ${mine ? "justify-end" : "justify-start"}`}><div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm shadow-sm sm:max-w-[70%] ${mine ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md bg-muted"}`}><p className="whitespace-pre-wrap break-words">{message.Message}</p><div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{message.$createdAt ? new Date(message.$createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Now"}{mine && <CheckCheck className="size-3" />}</div></div></div>;

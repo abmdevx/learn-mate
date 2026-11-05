@@ -35,6 +35,25 @@ export class NotificationService {
     }
   }
 
+  async sendMessageNotification(senderId: string, receiverId: string) {
+    try {
+      await this.tables.createRow({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwritenotificationsCollectionId,
+        rowId: ID.unique(),
+        data: {
+          SenderId: senderId,
+          ReceiverId: receiverId,
+          Status: "message",
+          Read: false,
+        },
+      });
+    } catch (err) {
+      console.error("❌ Error sending message notification:", err);
+      throw err;
+    }
+  }
+
     async getUnreadCount(userId: string): Promise<number> {
         try {
             const res = await this.tables.listRows({
@@ -95,6 +114,16 @@ export class NotificationService {
             console.error("❌ Error marking notifications as read:", err);
             throw err;
         }
+    }
+
+    subscribeToUserNotifications(userId: string, callback: (notification: Notification) => void) {
+        const channel = `databases.${conf.appwriteDatabaseId}.tables.${conf.appwritenotificationsCollectionId}.rows`;
+
+        return this.client.subscribe(channel, (response) => {
+            if (!response.events.some((event) => event.includes(".create"))) return;
+            const notification = response.payload as Notification;
+            if (notification.ReceiverId === userId) callback(notification);
+        });
     }
 }
 

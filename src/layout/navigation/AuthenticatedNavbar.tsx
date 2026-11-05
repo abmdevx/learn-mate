@@ -7,6 +7,7 @@ import { logoutUser } from "@/Redux/AuthThunks";
 import authService from "@/appwrite/auth";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/shared/branding/BrandLogo";
+import NotificationBell from "./NotificationBell";
 
 const AuthenticatedNavbar = () => {
   const user = useAppSelector((state) => state.auth.userData);
@@ -33,6 +34,7 @@ const AuthenticatedNavbar = () => {
           {links.map(({ to, label, icon: Icon }) => <Link key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"><Icon className="size-4" />{label}</Link>)}
         </nav>
         <div className="hidden items-center gap-1 md:flex">
+          <NotificationBell />
           <Button asChild variant="ghost" size="icon" className="rounded-lg"><Link to="/settings" aria-label="Settings"><Settings className="size-4" /></Link></Button>
           <Button asChild variant="ghost" size="icon" className="rounded-lg"><Link to="/profile" aria-label="Profile"><User className="size-4" /></Link></Button>
           <Button variant="ghost" size="icon" className="rounded-lg text-muted-foreground hover:text-destructive" onClick={logout} aria-label="Log out"><LogOut className="size-4" /></Button>

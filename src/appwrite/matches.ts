@@ -95,9 +95,20 @@ async getMatchDocByUserId(userId: string): Promise<MatchDocument | null> {
   async getMatchedProfiles(userId: string, authService: { getUsersByIds: (ids: string[]) => Promise<UserProfile[]> }): Promise<UserProfile[]> {
     try {
       const matchDoc = await this.getMatchDocByUserId(userId);
-      if (!matchDoc) return [];
+      let matchedIds = matchDoc?.MatchedUsers || [];
 
-      const matchedIds = matchDoc.MatchedUsers || [];
+      // Older match rows stored both participants but were only indexed to the
+      // user who initiated the like. Use Participants as a compatibility path.
+      if (!matchedIds.length) {
+        const participantMatches = await this.tables.listRows<MatchDocument>({
+          databaseId: conf.appwriteDatabaseId,
+          tableId: conf.appwritematchesCollectionId,
+          queries: [Query.contains("Participants", userId)],
+        });
+        matchedIds = participantMatches.rows.flatMap((row) => row.MatchedUsers || []);
+      }
+
+      matchedIds = [...new Set(matchedIds)].filter((id) => id !== userId);
       if (!matchedIds.length) return [];
 
       const profiles = await authService.getUsersByIds(matchedIds);
@@ -170,8 +181,10 @@ async saveLikedMatch(currentUserId: string, matchedUserId: string) {
 
     // 3. Update current user's match record
     await this.upsertMatchDoc(currentUserId, currentUser.Level, matchedUserId, commonTopics);
-    
-    await notificationService.sendLikeNotification(currentUserId, matchedUserId)
+
+    // Keep both users' conversation lists in sync after a like.
+    await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
+    await notificationService.sendLikeNotification(currentUserId, matchedUserId);
     // 4. Update matched user's match record
     // await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
 

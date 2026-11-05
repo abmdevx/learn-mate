@@ -3,6 +3,11 @@ import conf from "../config/ConfigID";
 import { Client, ID, TablesDB, Query } from "appwrite";
 import type { Message } from "../types";
 
+type MessagePage = {
+  rows: Message[];
+  total: number;
+};
+
 class MessageService {
   client = new Client();
   tables: TablesDB;
@@ -46,22 +51,32 @@ class MessageService {
   }
 
   // ✅ Get messages of a match (conversation)
-  async getMessages(matchId: string): Promise<Message[]> {
+  async getMessagesPage(
+    matchId: string,
+    { limit = 50, offset = 0 }: { limit?: number; offset?: number } = {},
+  ): Promise<MessagePage> {
     try {
       const response = await this.tables.listRows<Message>({
         databaseId: conf.appwriteDatabaseId,
         tableId: conf.appwritemessagesCollectionId,
         queries: [
           Query.equal("MatchId", matchId),
-          Query.orderAsc("$createdAt"), // order by time ascending
+          Query.orderDesc("$createdAt"),
+          Query.limit(limit),
+          Query.offset(offset),
         ],
       });
-      return response.rows;
+      return { rows: response.rows.reverse(), total: response.total };
     } catch (error) {
-      if (error.message.includes("Rate limit")) this.resetClient();
+      if (error instanceof Error && error.message.includes("Rate limit")) this.resetClient();
       console.error("❌ Error fetching messages:", error);
       throw error;
     }
+  }
+
+  async getMessages(matchId: string): Promise<Message[]> {
+    const response = await this.getMessagesPage(matchId, { limit: 100 });
+    return response.rows;
   }
 
   // ✅ Get all messages sent by a user (optional)
