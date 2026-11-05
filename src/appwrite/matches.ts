@@ -1,6 +1,7 @@
 import conf from "../config/ConfigID";
 import { Client, TablesDB, Query, ID } from "appwrite";
 import notificationService from "./notifications";
+import likeService from "./likes";
 import type { MatchDocument, UserProfile } from "../types";
 export class MatchService {
   client = new Client();
@@ -30,6 +31,10 @@ export class MatchService {
       // Get user's match document to exclude already liked/matched users
       const userMatchDoc = await this.getMatchDocByUserId(currentUserId);
       const alreadyMatchedIds = userMatchDoc?.MatchedUsers || [];
+      const sentLikes = await likeService.getSentLikes(currentUserId);
+      const alreadyLikedIds = sentLikes
+        .filter((like) => like.Status !== "rejected" && like.Status !== "blocked")
+        .map((like) => like.ReceiverId);
 
       // Fetch all other users
       const matches = await this.tables.listRows<UserProfile>({
@@ -52,7 +57,7 @@ export class MatchService {
 
       // Rank and filter
       const ranked = matches.rows
-        .filter((c) => !alreadyMatchedIds.includes(c.$id)) // ✅ Exclude already matched users
+        .filter((c) => !alreadyMatchedIds.includes(c.$id) && !alreadyLikedIds.includes(c.$id))
         .map((c) => ({
           ...c,
           score: calcScore(c),
@@ -165,7 +170,7 @@ async upsertMatchDoc(userId: string, level: string | undefined, matchedUserId: s
   }
 }
 
-  // 💾 2) Save liked match (updates both users' MatchedUsers lists)
+  // Create a like and only create a conversation after both users like each other.
 async saveLikedMatch(currentUserId: string, matchedUserId: string) {
   try {
     // 1. Get both users
@@ -179,16 +184,22 @@ async saveLikedMatch(currentUserId: string, matchedUserId: string) {
     // 2. Find common topics
     const commonTopics = this.getCommonTopics(currentUser.Topics, matchedUser.Topics);
 
-    // 3. Update current user's match record
+    const outgoingLike = await likeService.createOrUpdateLike(currentUserId, matchedUserId);
+    const incomingLike = await likeService.getLike(matchedUserId, currentUserId);
+
+    if (!incomingLike || incomingLike.Status === "rejected" || incomingLike.Status === "blocked") {
+      await notificationService.sendLikeNotification(currentUserId, matchedUserId);
+      return { success: true, matched: false };
+    }
+
+    await likeService.updateLikeStatus(outgoingLike.$id, "accepted");
+    await likeService.updateLikeStatus(incomingLike.$id, "accepted");
     await this.upsertMatchDoc(currentUserId, currentUser.Level, matchedUserId, commonTopics);
-
-    // Keep both users' conversation lists in sync after a like.
     await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
-    await notificationService.sendLikeNotification(currentUserId, matchedUserId);
-    // 4. Update matched user's match record
-    // await this.upsertMatchDoc(matchedUserId, matchedUser.Level, currentUserId, commonTopics);
+    await notificationService.sendMatchNotification(currentUserId, matchedUserId);
+    await notificationService.sendMatchNotification(matchedUserId, currentUserId);
 
-    return { success: true };
+    return { success: true, matched: true };
   } catch (error) {
     console.error("❌ Error saving match:", error);
     throw error;

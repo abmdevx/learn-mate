@@ -24,6 +24,7 @@ export default function MatchDiscoveryPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [profile, setProfile] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [likingMatchId, setLikingMatchId] = useState<string | null>(null);
   const navigate = useNavigate();
   const [toast, setToast] = useState({
     show: false,
@@ -67,7 +68,9 @@ export default function MatchDiscoveryPage() {
   };
 
   const handleLike = async (matchId) => {
+    if (likingMatchId) return;
     try {
+      setLikingMatchId(matchId);
       const currentUserId = userData.$id;
       console.log("Saving match:", currentUserId, matchId);
       await matchService.saveLikedMatch(currentUserId, matchId);
@@ -85,7 +88,8 @@ export default function MatchDiscoveryPage() {
         type: "error",
       });
       console.error("❌ Error saving match:", error.message || error);
-      throw error;
+    } finally {
+      setLikingMatchId(null);
     }
   };
 
@@ -197,7 +201,10 @@ export default function MatchDiscoveryPage() {
                   </div>
                   <div className="mt-8 flex w-full gap-3">
                     <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setSelectedMatch(null)}><X className="mr-2 size-4" />Skip</Button>
-                    <Button onClick={() => handleLike(selectedMatch.$id)} className="flex-1 rounded-xl"><ThumbsUp className="mr-2 size-4" />Like</Button>
+                    <Button onClick={() => handleLike(selectedMatch.$id)} disabled={likingMatchId === selectedMatch.$id} className="flex-1 rounded-xl">
+                      {likingMatchId === selectedMatch.$id ? <Loader2 className="mr-2 size-4 animate-spin" /> : <ThumbsUp className="mr-2 size-4" />}
+                      {likingMatchId === selectedMatch.$id ? "Saving…" : "Like"}
+                    </Button>
                   </div>
                 </div>
               </ScrollArea>

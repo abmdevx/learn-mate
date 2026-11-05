@@ -24,7 +24,7 @@ export class NotificationService {
         data: {
           SenderId: senderId,
           ReceiverId: receiverId,
-          Status: "pending",
+          Status: "like",
           Read: false,
         },
       });
@@ -50,6 +50,20 @@ export class NotificationService {
       });
     } catch (err) {
       console.error("❌ Error sending message notification:", err);
+      throw err;
+    }
+  }
+
+  async sendMatchNotification(senderId: string, receiverId: string) {
+    try {
+      await this.tables.createRow({
+        databaseId: conf.appwriteDatabaseId,
+        tableId: conf.appwritenotificationsCollectionId,
+        rowId: ID.unique(),
+        data: { SenderId: senderId, ReceiverId: receiverId, Status: "match", Read: false },
+      });
+    } catch (err) {
+      console.error("❌ Error sending match notification:", err);
       throw err;
     }
   }

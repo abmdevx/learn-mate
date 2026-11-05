@@ -1,4 +1,4 @@
-import { Bell, Heart, MessageCircle } from "lucide-react";
+import { Bell, Heart, MessageCircle, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/Redux/Hooks";
@@ -65,7 +65,7 @@ function NotificationBell() {
   };
 
   const openNotification = (notification: Notification) => {
-    if (notification.Status === "message") navigate(`/messages/${notification.SenderId}`);
+    if (notification.Status === "message" || notification.Status === "match") navigate(`/messages/${notification.SenderId}`);
     else navigate(`/user/${notification.SenderId}`);
   };
 
@@ -83,9 +83,10 @@ function NotificationBell() {
         {notifications.length === 0 ? <div className="px-3 py-8 text-center text-sm text-muted-foreground">You’re all caught up.</div> : notifications.map((notification) => {
           const sender = senders[notification.SenderId];
           const isMessage = notification.Status === "message";
+          const isMatch = notification.Status === "match";
           return <button key={notification.$id} onClick={() => openNotification(notification)} className="flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/60">
             <Avatar className="size-9"><AvatarFallback>{sender?.Name?.slice(0, 1).toUpperCase() || "?"}</AvatarFallback></Avatar>
-            <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-sm font-medium">{isMessage ? <MessageCircle className="size-3.5 text-primary" /> : <Heart className="size-3.5 text-rose-400" />}{sender?.Name || "Someone"} {isMessage ? "sent you a message" : "liked your profile"}</span><span className="mt-1 block text-xs text-muted-foreground">{new Date(notification.$createdAt).toLocaleString()}</span></span>
+            <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-sm font-medium">{isMessage ? <MessageCircle className="size-3.5 text-primary" /> : isMatch ? <Sparkles className="size-3.5 text-primary" /> : <Heart className="size-3.5 text-rose-400" />}{sender?.Name || "Someone"} {isMessage ? "sent you a message" : isMatch ? "matched with you" : "liked your profile"}</span><span className="mt-1 block text-xs text-muted-foreground">{new Date(notification.$createdAt).toLocaleString()}</span></span>
             {!notification.Read && <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />}
           </button>;
         })}

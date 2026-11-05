@@ -30,7 +30,7 @@ export interface Message extends Models.Row {
 export interface Notification extends Models.Row {
   SenderId: string;
   ReceiverId: string;
-  Status: "pending" | "message" | string;
+  Status: "like" | "match" | "message" | "pending" | string;
   Read: boolean;
 }
 

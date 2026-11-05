@@ -6,6 +6,7 @@ const conf = {
     appwritemessagesCollectionId: String(import.meta.env.VITE_APPWRITE_MESSAGES_COLLECTION_ID),
     appwritematchesCollectionId: String(import.meta.env.VITE_APPWRITE_MATCHES_COLLECTION_ID),
     appwritenotificationsCollectionId: String(import.meta.env.VITE_APPWRITE_NOTIFICATIONS_COLLECTION_ID),
+    appwritelikesCollectionId: String(import.meta.env.VITE_APPWRITE_LIKES_COLLECTION_ID),
 };
 
 export default conf;
